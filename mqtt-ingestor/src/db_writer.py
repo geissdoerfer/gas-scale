@@ -4,8 +4,8 @@ Handles connection pooling and data insertion.
 """
 import logging
 from datetime import datetime
-import psycopg2
-from psycopg2 import pool
+import psycopg
+from psycopg_pool import ConnectionPool
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -15,14 +15,19 @@ class DatabaseWriter:
     def __init__(self):
         """Initialize database connection pool"""
         try:
-            self.connection_pool = psycopg2.pool.ThreadedConnectionPool(
-                Config.DB_POOL_MIN,
-                Config.DB_POOL_MAX,
-                host=Config.POSTGRES_HOST,
-                port=Config.POSTGRES_PORT,
-                database=Config.POSTGRES_DB,
-                user=Config.POSTGRES_USER,
-                password=Config.POSTGRES_PASSWORD
+            # Build connection string for psycopg3
+            conninfo = (
+                f"host={Config.POSTGRES_HOST} "
+                f"port={Config.POSTGRES_PORT} "
+                f"dbname={Config.POSTGRES_DB} "
+                f"user={Config.POSTGRES_USER} "
+                f"password={Config.POSTGRES_PASSWORD}"
+            )
+
+            self.connection_pool = ConnectionPool(
+                conninfo,
+                min_size=Config.DB_POOL_MIN,
+                max_size=Config.DB_POOL_MAX
             )
             logger.info("Database connection pool created successfully")
         except Exception as e:

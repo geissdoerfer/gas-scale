@@ -4,8 +4,8 @@
 
 ✅ **Phase 1: Database Setup** - Complete
 ✅ **Phase 2: MQTT Ingestor** - Complete
-⏳ **Phase 3: Web API** - Not started
-⏳ **Phase 4: Web Frontend** - Not started
+✅ **Phase 3: Web API** - Complete
+✅ **Phase 4: Web Frontend** - Complete
 
 ## What's Been Implemented
 
@@ -22,9 +22,30 @@
 - Database writer with connection pooling
 - Auto-device registration
 - Message validation
+- Device ID extracted from topic (security feature)
 - Error handling and logging
 - Dockerized service
 - Source code: [mqtt-ingestor/src/](mqtt-ingestor/src/)
+
+### Web API (FastAPI)
+- JWT authentication with access/refresh tokens
+- Role-based access control (admin/user)
+- User management endpoints (CRUD)
+- Device management with assignment system
+- Sensor reading query endpoints
+- Dashboard endpoint with latest readings
+- Automatic API documentation (Swagger UI)
+- Source code: [web-api/src/](web-api/src/)
+
+### Web Frontend (Vue.js 3)
+- Modern responsive UI with Composition API
+- User authentication and session management
+- Dashboard with device cards and status indicators
+- Device detail view with Chart.js visualizations
+- Historical data with time-range selection
+- Admin panel for user/device management
+- Real-time status updates
+- Source code: [frontend/src/](frontend/src/)
 
 ## Quick Start
 
@@ -55,6 +76,15 @@
    ```bash
    docker-compose ps
    ```
+
+5. **Access the application:**
+   - Frontend: http://localhost:3000
+   - API Documentation: http://localhost:8000/docs
+   - Database: localhost:5432
+
+6. **Login with default admin:**
+   - Username: `admin`
+   - Password: `admin123`
 
 ### Testing
 

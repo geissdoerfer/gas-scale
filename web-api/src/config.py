@@ -2,7 +2,8 @@
 Configuration management for Web API.
 Loads settings from environment variables using Pydantic.
 """
-from pydantic_settings import BaseSettings
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import List
 
 
@@ -26,19 +27,20 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True
+    )
+
     @property
     def DATABASE_URL(self) -> str:
         """Get PostgreSQL connection URL"""
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
         """Get CORS origins as list"""
         return [origin.strip() for origin in self.API_CORS_ORIGINS.split(",")]
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 
 # Create global settings instance

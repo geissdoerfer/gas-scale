@@ -1,0 +1,6 @@
+# Testing dependencies
+pytest
+pytest-cov
+pytest-asyncio
+httpx
+faker

@@ -1,6 +1,26 @@
 version: '3.8'
 
 services:
+  # MQTT Broker (Eclipse Mosquitto)
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: duoclean-mosquitto
+    ports:
+      - "1883:1883"  # MQTT port
+      - "9001:9001"  # WebSocket port
+    volumes:
+      - ./broker/config:/mosquitto/config:rw
+      - ./broker/data:/mosquitto/data:rw
+      - ./broker/log:/mosquitto/log:rw
+    restart: unless-stopped
+    networks:
+      - duoclean-network
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   # PostgreSQL + TimescaleDB
   postgres:
     image: timescale/timescaledb:latest-pg15
@@ -47,6 +67,8 @@ services:
       DB_POOL_MAX: ${DB_POOL_MAX}
       LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
+      mosquitto:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     restart: unless-stopped
@@ -76,6 +98,25 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - duoclean-network
+
+  # Frontend (Vue.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: duoclean-frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - web-api
     restart: unless-stopped
     networks:
       - duoclean-network

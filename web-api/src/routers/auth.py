@@ -49,13 +49,13 @@ def login(
 
     # Create tokens
     token_data = {
-        "sub": user.id,
+        "sub": str(user.id),  # JWT spec requires sub to be a string
         "username": user.username,
         "role": user.role
     }
 
     access_token = auth.create_access_token(token_data)
-    refresh_token = auth.create_refresh_token({"sub": user.id})
+    refresh_token = auth.create_refresh_token({"sub": str(user.id)})
 
     return {
         "access_token": access_token,
@@ -106,7 +106,7 @@ def refresh_token(
 
         # Create new access token
         token_data = {
-            "sub": user.id,
+            "sub": str(user.id),  # JWT spec requires sub to be a string
             "username": user.username,
             "role": user.role
         }

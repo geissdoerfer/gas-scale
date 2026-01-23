@@ -42,12 +42,15 @@ def get_current_user(
     try:
         token = credentials.credentials
         payload = decode_token(token)
-        user_id: Optional[int] = payload.get("sub")
+        user_id_str: Optional[str] = payload.get("sub")
 
-        if user_id is None:
+        if user_id_str is None:
             raise credentials_exception
 
-    except JWTError:
+        # Convert string back to integer
+        user_id = int(user_id_str)
+
+    except (JWTError, ValueError):
         raise credentials_exception
 
     # Get user from database

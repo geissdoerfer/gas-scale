@@ -93,6 +93,13 @@ desktop.ini
 docs/_build/
 site/
 
+# Frontend / Node.js
+node_modules/
+package-lock.json
+frontend/dist/
+frontend/.vite/
+*.local
+
 # Backup files
 *~
 *.backup

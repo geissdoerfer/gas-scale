@@ -1,7 +1,7 @@
 """
 Sensor readings query endpoints.
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, text
 from typing import Optional
