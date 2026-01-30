@@ -106,30 +106,6 @@ static esp_mqtt_client_handle_t mqtt_app_start(void) {
   esp_mqtt_client_config_t mqtt_cfg = {
       .broker.address.uri = CONFIG_BROKER_URL,
   };
-#if CONFIG_BROKER_URL_FROM_STDIN
-  char line[128];
-
-  if (strcmp(mqtt_cfg.broker.address.uri, "FROM_STDIN") == 0) {
-    int count = 0;
-    printf("Please enter url of mqtt broker\n");
-    while (count < 128) {
-      int c = fgetc(stdin);
-      if (c == '\n') {
-        line[count] = '\0';
-        break;
-      } else if (c > 0 && c < 127) {
-        line[count] = c;
-        ++count;
-      }
-      vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-    mqtt_cfg.broker.address.uri = line;
-    printf("Broker url: %s\n", line);
-  } else {
-    ESP_LOGE(TAG, "Configuration mismatch: wrong broker url");
-    abort();
-  }
-#endif /* CONFIG_BROKER_URL_FROM_STDIN */
 
   esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
   /* The last argument may be used to pass data to the event handler, in this
@@ -179,7 +155,7 @@ void app_main(void) {
   const float scale =
       (float)ref_weight / (ref_raw - zero_raw); // grams per raw unit
 
-  char payload[32];
+  char payload[128];
   while (1) {
     // Wait for HX711 to be ready
     esp_err_t r = hx711_wait(&dev, 500);
@@ -205,8 +181,11 @@ void app_main(void) {
              weight_grams);
 
     // Publish weight in grams via MQTT
-    snprintf(payload, sizeof(payload), "%.1f", weight_grams);
-    msg_id = esp_mqtt_client_publish(client, "/topic/weight", payload, 0, 1, 0);
+    snprintf(payload, sizeof(payload),
+             "{\"weight\":%.3f,\"temperature\":%.3f,\"battery_voltage\":%.3f}",
+             weight_grams, 23.5, 3.9);
+    msg_id = esp_mqtt_client_publish(client, "sensors/a46fb35d/data", payload,
+                                     0, 1, 0);
     ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
