@@ -3,7 +3,7 @@
 MQTT Test Data Publisher
 
 Publishes random sensor data to MQTT broker for testing purposes.
-Simulates IoT device sending load, battery voltage, and temperature readings.
+Simulates IoT device sending weight (in grams), battery voltage, and temperature readings.
 
 Usage:
     python test_mqtt_publisher.py --device-id sensor_001 --rate 1.0
@@ -27,19 +27,19 @@ except ImportError:
 class SensorDataGenerator:
     """Generates realistic sensor data with some variation"""
 
-    def __init__(self, base_load=40.0, base_voltage=12.6, base_temp=23.0):
-        self.base_load = base_load
+    def __init__(self, base_weight=1500.0, base_voltage=12.6, base_temp=23.0):
+        self.base_weight = base_weight
         self.base_voltage = base_voltage
         self.base_temp = base_temp
-        self.load_trend = 0.0
+        self.weight_trend = 0.0
         self.voltage_trend = 0.0
         self.temp_trend = 0.0
 
     def generate(self):
         """Generate a reading with realistic variations"""
         # Add random walk to trends
-        self.load_trend += random.uniform(-0.5, 0.5)
-        self.load_trend = max(-5.0, min(5.0, self.load_trend))  # Limit trend
+        self.weight_trend += random.uniform(-10.0, 10.0)
+        self.weight_trend = max(-200.0, min(200.0, self.weight_trend))  # Limit trend
 
         self.voltage_trend += random.uniform(-0.02, 0.02)
         self.voltage_trend = max(-0.5, min(0.5, self.voltage_trend))
@@ -48,17 +48,17 @@ class SensorDataGenerator:
         self.temp_trend = max(-2.0, min(2.0, self.temp_trend))
 
         # Generate values with noise
-        load = self.base_load + self.load_trend + random.uniform(-2.0, 2.0)
+        weight = self.base_weight + self.weight_trend + random.uniform(-50.0, 50.0)
         voltage = self.base_voltage + self.voltage_trend + random.uniform(-0.1, 0.1)
         temp = self.base_temp + self.temp_trend + random.uniform(-0.5, 0.5)
 
         # Ensure realistic bounds
-        load = max(0.0, min(100.0, load))
+        weight = max(0.0, min(5000.0, weight))  # 0 to 5kg in grams
         voltage = max(10.0, min(14.0, voltage))
         temp = max(-10.0, min(50.0, temp))
 
         return {
-            "load": round(load, 2),
+            "weight": round(weight, 2),
             "battery_voltage": round(voltage, 2),
             "temperature": round(temp, 2),
         }
@@ -123,7 +123,7 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         generator = SensorDataGenerator()
     elif mode == "random":
         generator = SensorDataGenerator(
-            base_load=random.uniform(20, 60),
+            base_weight=random.uniform(500, 3000),
             base_voltage=random.uniform(11.5, 13.0),
             base_temp=random.uniform(15, 30),
         )
@@ -131,7 +131,7 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         generator = SensorDataGenerator()
         # Override generate to return stable values
         generator.generate = lambda: {
-            "load": 45.0,
+            "weight": 1500.0,
             "battery_voltage": 12.6,
             "temperature": 23.0,
         }
@@ -163,7 +163,7 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
                 message_count += 1
                 print(
-                    f"[{message_count:4d}] Published: Load={data['load']:5.2f}W  "
+                    f"[{message_count:4d}] Published: Weight={data['weight']:7.2f}g  "
                     f"Voltage={data['battery_voltage']:5.2f}V  "
                     f"Temp={data['temperature']:5.2f}°C"
                 )

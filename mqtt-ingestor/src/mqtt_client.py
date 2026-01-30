@@ -107,7 +107,7 @@ class MQTTIngestor:
             True if valid, False otherwise
         """
         # Check that at least one sensor value is present
-        sensor_fields = ['load', 'battery_voltage', 'temperature']
+        sensor_fields = ['weight', 'battery_voltage', 'temperature']
         has_sensor_value = any(field in payload for field in sensor_fields)
 
         if not has_sensor_value:
@@ -143,7 +143,7 @@ class MQTTIngestor:
             timestamp = datetime.utcnow()
 
         # Extract sensor values
-        load = payload.get('load')
+        weight = payload.get('weight')
         battery_voltage = payload.get('battery_voltage')
         temperature = payload.get('temperature')
 
@@ -152,7 +152,7 @@ class MQTTIngestor:
             self.db_writer.insert_reading(
                 device_id=device_id,
                 timestamp=timestamp,
-                load=load,
+                weight=weight,
                 battery_voltage=battery_voltage,
                 temperature=temperature
             )

@@ -76,7 +76,7 @@ class DeviceWithLatestReading(DeviceResponse):
 class SensorReadingResponse(BaseModel):
     time: datetime
     device_id: str
-    load: Optional[float] = None
+    weight: Optional[float] = None
     battery_voltage: Optional[float] = None
     temperature: Optional[float] = None
 
@@ -94,9 +94,9 @@ class SensorReadingList(BaseModel):
 class AggregateReading(BaseModel):
     bucket: datetime
     device_id: str
-    avg_load: Optional[float] = None
-    min_load: Optional[float] = None
-    max_load: Optional[float] = None
+    avg_weight: Optional[float] = None
+    min_weight: Optional[float] = None
+    max_weight: Optional[float] = None
     avg_battery_voltage: Optional[float] = None
     min_battery_voltage: Optional[float] = None
     max_battery_voltage: Optional[float] = None

@@ -75,7 +75,7 @@ class DatabaseWriter:
         self,
         device_id: str,
         timestamp: datetime,
-        load: float = None,
+        weight: float = None,
         battery_voltage: float = None,
         temperature: float = None
     ):
@@ -85,7 +85,7 @@ class DatabaseWriter:
         Args:
             device_id: Device identifier
             timestamp: Reading timestamp
-            load: Load reading (optional)
+            weight: Weight reading in grams (optional)
             battery_voltage: Battery voltage reading (optional)
             temperature: Temperature reading (optional)
         """
@@ -100,11 +100,11 @@ class DatabaseWriter:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    INSERT INTO sensor_readings (time, device_id, load, battery_voltage, temperature)
+                    INSERT INTO sensor_readings (time, device_id, weight, battery_voltage, temperature)
                     VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (time, device_id) DO NOTHING
                     """,
-                    (timestamp, device_id, load, battery_voltage, temperature)
+                    (timestamp, device_id, weight, battery_voltage, temperature)
                 )
                 conn.commit()
                 logger.debug(f"Inserted reading for device {device_id} at {timestamp}")

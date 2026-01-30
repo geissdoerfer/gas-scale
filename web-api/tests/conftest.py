@@ -133,7 +133,7 @@ def sample_reading(db_session, sample_device):
     reading = models.SensorReading(
         time=datetime.utcnow(),
         device_id=sample_device.device_id,
-        load=45.2,
+        weight=1500.0,
         battery_voltage=12.6,
         temperature=23.5
     )

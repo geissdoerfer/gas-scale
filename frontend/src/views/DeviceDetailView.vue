@@ -46,9 +46,9 @@
           <h3>Latest Reading</h3>
           <div class="readings-grid">
             <div class="reading-box">
-              <div class="reading-label">Load</div>
-              <div class="reading-value">{{ formatValue(device.latest_reading.load) }}</div>
-              <div class="reading-unit">kW</div>
+              <div class="reading-label">Weight</div>
+              <div class="reading-value">{{ formatValue(device.latest_reading.weight) }}</div>
+              <div class="reading-unit">g</div>
             </div>
             <div class="reading-box">
               <div class="reading-label">Battery Voltage</div>
@@ -83,8 +83,8 @@
 
         <!-- Charts -->
         <div v-if="chartData" class="card">
-          <h3>Load (kW)</h3>
-          <LineChart :data="chartData.load" />
+          <h3>Weight (g)</h3>
+          <LineChart :data="chartData.weight" />
         </div>
 
         <div v-if="chartData" class="card">
@@ -147,11 +147,11 @@ const chartData = computed(() => {
   const labels = readings.value.map(r => new Date(r.time))
 
   return {
-    load: {
+    weight: {
       labels,
       datasets: [{
-        label: 'Load (kW)',
-        data: readings.value.map(r => r.load),
+        label: 'Weight (g)',
+        data: readings.value.map(r => r.weight),
         borderColor: 'rgb(37, 99, 235)',
         backgroundColor: 'rgba(37, 99, 235, 0.1)',
         tension: 0.4,

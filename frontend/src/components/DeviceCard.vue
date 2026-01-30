@@ -9,8 +9,8 @@
 
     <div v-if="device.latest_reading" class="device-readings">
       <div class="reading-item">
-        <span class="reading-label">Load:</span>
-        <span class="reading-value">{{ formatValue(device.latest_reading.load) }} kW</span>
+        <span class="reading-label">Weight:</span>
+        <span class="reading-value">{{ formatValue(device.latest_reading.weight) }} g</span>
       </div>
       <div class="reading-item">
         <span class="reading-label">Battery:</span>

@@ -48,7 +48,7 @@ CREATE INDEX idx_user_device_access_device_id ON user_device_access(device_id);
 CREATE TABLE sensor_readings (
     time TIMESTAMPTZ NOT NULL,
     device_id VARCHAR(50) NOT NULL,
-    load FLOAT,
+    weight FLOAT,
     battery_voltage FLOAT,
     temperature FLOAT,
     PRIMARY KEY (time, device_id)
@@ -66,11 +66,11 @@ WITH (timescaledb.continuous) AS
 SELECT
     time_bucket('1 hour', time) AS bucket,
     device_id,
-    AVG(load) AS avg_load,
+    AVG(weight) AS avg_weight,
     AVG(battery_voltage) AS avg_battery_voltage,
     AVG(temperature) AS avg_temperature,
-    MIN(load) AS min_load,
-    MAX(load) AS max_load,
+    MIN(weight) AS min_weight,
+    MAX(weight) AS max_weight,
     MIN(battery_voltage) AS min_battery_voltage,
     MAX(battery_voltage) AS max_battery_voltage,
     MIN(temperature) AS min_temperature,

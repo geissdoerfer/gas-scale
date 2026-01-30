@@ -57,6 +57,6 @@ class SensorReading(Base):
 
     time = Column(TIMESTAMP(timezone=True), primary_key=True)
     device_id = Column(String(50), primary_key=True, index=True)
-    load = Column(Float, nullable=True)
+    weight = Column(Float, nullable=True)
     battery_voltage = Column(Float, nullable=True)
     temperature = Column(Float, nullable=True)

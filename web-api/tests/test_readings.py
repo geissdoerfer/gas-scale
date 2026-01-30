@@ -20,7 +20,7 @@ class TestGetDeviceReadings:
             reading = models.SensorReading(
                 time=base_time - timedelta(hours=i),
                 device_id=sample_device.device_id,
-                load=40.0 + i,
+                weight=1500.0 + i * 100,
                 battery_voltage=12.0 + i * 0.1,
                 temperature=20.0 + i
             )
@@ -47,7 +47,7 @@ class TestGetDeviceReadings:
             reading = models.SensorReading(
                 time=base_time - timedelta(hours=i),
                 device_id=sample_device.device_id,
-                load=40.0,
+                weight=1500.0,
                 battery_voltage=12.0,
                 temperature=20.0
             )
@@ -78,7 +78,7 @@ class TestGetDeviceReadings:
             reading = models.SensorReading(
                 time=base_time - timedelta(hours=i),
                 device_id=sample_device.device_id,
-                load=40.0,
+                weight=1500.0,
                 battery_voltage=12.0,
                 temperature=20.0
             )
