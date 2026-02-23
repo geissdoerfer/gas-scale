@@ -1,13 +1,11 @@
-version: '3.8'
-
 services:
   # MQTT Broker (Eclipse Mosquitto)
   mosquitto:
     image: eclipse-mosquitto
     container_name: duoclean-mosquitto
     ports:
-      - "1883:1883"  # MQTT port
-      - "9001:9001"  # WebSocket port
+      - "1883:1883" # MQTT port
+      - "9001:9001" # WebSocket port
     volumes:
       - ./broker/config:/mosquitto/config:rw
       - ./broker/data:/mosquitto/data:rw
@@ -16,7 +14,7 @@ services:
     networks:
       - duoclean-network
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1"]
+      test: [ "CMD-SHELL", "mosquitto_sub -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -35,7 +33,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5

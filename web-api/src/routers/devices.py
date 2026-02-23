@@ -70,7 +70,7 @@ def get_device(
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get device with latest reading"""
+    """Get device with latest reading and calibration applied"""
     device = db.query(models.Device).filter(models.Device.device_id == device_id).first()
     if not device:
         raise HTTPException(
@@ -86,6 +86,22 @@ def get_device(
         models.SensorReading.device_id == device_id
     ).order_by(desc(models.SensorReading.time)).first()
 
+    # Apply calibration to latest reading
+    latest_reading_dict = None
+    if latest:
+        weight = None
+        if latest.raw_value is not None:
+            weight = (latest.raw_value + device.offset) * device.gain
+
+        latest_reading_dict = {
+            "time": latest.time,
+            "device_id": latest.device_id,
+            "raw_value": latest.raw_value,
+            "weight": weight,
+            "battery_voltage": latest.battery_voltage,
+            "temperature": latest.temperature
+        }
+
     # Determine status
     status_value = "unknown"
     if latest:
@@ -99,9 +115,11 @@ def get_device(
         "device_id": device.device_id,
         "name": device.name,
         "description": device.description,
+        "offset": device.offset,
+        "gain": device.gain,
         "created_at": device.created_at,
         "updated_at": device.updated_at,
-        "latest_reading": latest,
+        "latest_reading": latest_reading_dict,
         "status": status_value
     }
 
@@ -183,3 +201,39 @@ def unassign_device(
     db.commit()
 
     return {"message": "Device unassigned successfully"}
+
+
+@router.patch("/{device_id}/calibration", response_model=schemas.DeviceResponse)
+def update_device_calibration(
+    device_id: str,
+    calibration: schemas.DeviceCalibration,
+    current_user: models.User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Update device calibration parameters (admin only).
+
+    Calibration formula: weight = (raw_value + offset) * gain
+
+    Args:
+        device_id: Device identifier
+        calibration: Calibration parameters (offset and gain)
+
+    Returns:
+        Updated device information
+    """
+    device = db.query(models.Device).filter(models.Device.device_id == device_id).first()
+    if not device:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device not found"
+        )
+
+    # Update calibration values
+    device.offset = calibration.offset
+    device.gain = calibration.gain
+
+    db.commit()
+    db.refresh(device)
+
+    return device

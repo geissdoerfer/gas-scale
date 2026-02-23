@@ -18,11 +18,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "driver/gpio.h"
 #include "esp_log.h"
 #include "hx711.h"
 #include "mqtt_client.h"
 
 static const char *TAG = "mqtt_example";
+
+#define LED_GPIO 15
 
 static void log_error_if_nonzero(const char *message, int error_code) {
   if (error_code != 0) {
@@ -141,6 +144,11 @@ void app_main(void) {
    */
   ESP_ERROR_CHECK(example_connect());
 
+  // Configure LED GPIO
+  gpio_reset_pin(LED_GPIO);
+  gpio_set_direction(LED_GPIO, GPIO_MODE_OUTPUT);
+  ESP_LOGI(TAG, "LED configured on GPIO%d", LED_GPIO);
+
   esp_mqtt_client_handle_t client = mqtt_app_start();
 
   // Initialize HX711 device
@@ -148,15 +156,13 @@ void app_main(void) {
   ESP_ERROR_CHECK(hx711_init(&dev));
   ESP_LOGI(TAG, "Init HX711 successfull!");
 
-  // HX711 calibration values
-  const int32_t zero_raw = 270000; // Raw value at 0g
-  const int32_t ref_raw = 303000;  // Raw value at 1260g
-  const int32_t ref_weight = 2692; // Reference weight in grams
-  const float scale =
-      (float)ref_weight / (ref_raw - zero_raw); // grams per raw unit
-
   char payload[128];
+  uint8_t led_state = 0;
   while (1) {
+    // Toggle LED
+    gpio_set_level(LED_GPIO, led_state);
+    led_state = !led_state;
+
     // Wait for HX711 to be ready
     esp_err_t r = hx711_wait(&dev, 500);
     if (r != ESP_OK) {
@@ -174,16 +180,12 @@ void app_main(void) {
       continue;
     }
 
-    // Convert raw value to grams
-    float weight_grams = (raw_data - zero_raw) * scale;
+    ESP_LOGI(TAG, "Raw data: %" PRIi32, raw_data);
 
-    ESP_LOGI(TAG, "Raw data: %" PRIi32 ", Weight: %.1f g", raw_data,
-             weight_grams);
-
-    // Publish weight in grams via MQTT
+    // Publish raw value via MQTT
     snprintf(payload, sizeof(payload),
-             "{\"weight\":%.3f,\"temperature\":%.3f,\"battery_voltage\":%.3f}",
-             weight_grams, 23.5, 3.9);
+             "{\"value\":%" PRIi32 ",\"temperature\":%.3f,\"battery_voltage\":%.3f}",
+             raw_data, 23.5, 3.9);
     msg_id = esp_mqtt_client_publish(client, "sensors/a46fb35d/data", payload,
                                      0, 1, 0);
     ESP_LOGI(TAG, "sent publish successful, msg_id=%d", msg_id);

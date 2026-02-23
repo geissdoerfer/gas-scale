@@ -51,16 +51,26 @@ class DeviceBase(BaseModel):
 
 
 class DeviceCreate(DeviceBase):
-    pass
+    offset: float = 0.0
+    gain: float = 1.0
 
 
 class DeviceUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
     description: Optional[str] = None
+    offset: Optional[float] = None
+    gain: Optional[float] = None
+
+
+class DeviceCalibration(BaseModel):
+    offset: float = Field(..., description="Calibration offset value")
+    gain: float = Field(..., gt=0, description="Calibration gain/scale factor (must be > 0)")
 
 
 class DeviceResponse(DeviceBase):
     id: int
+    offset: float
+    gain: float
     created_at: datetime
     updated_at: datetime
 
@@ -76,7 +86,8 @@ class DeviceWithLatestReading(DeviceResponse):
 class SensorReadingResponse(BaseModel):
     time: datetime
     device_id: str
-    weight: Optional[float] = None
+    raw_value: Optional[float] = None
+    weight: Optional[float] = None  # Calculated: (raw_value + offset) * gain
     battery_voltage: Optional[float] = None
     temperature: Optional[float] = None
 

@@ -25,12 +25,18 @@ CREATE TABLE devices (
     device_id VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(100),
     description TEXT,
+    "offset" FLOAT DEFAULT -274753.0 NOT NULL,
+    gain FLOAT DEFAULT 0.0797197 NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Index for fast device_id lookups
 CREATE INDEX idx_devices_device_id ON devices(device_id);
+
+-- Comments for calibration columns
+COMMENT ON COLUMN devices."offset" IS 'Calibration offset: raw_value + offset';
+COMMENT ON COLUMN devices.gain IS 'Calibration gain/scale factor: (raw_value + offset) * gain = weight';
 
 -- ===== USER DEVICE ACCESS TABLE =====
 CREATE TABLE user_device_access (
@@ -48,7 +54,7 @@ CREATE INDEX idx_user_device_access_device_id ON user_device_access(device_id);
 CREATE TABLE sensor_readings (
     time TIMESTAMPTZ NOT NULL,
     device_id VARCHAR(50) NOT NULL,
-    weight FLOAT,
+    raw_value FLOAT,
     battery_voltage FLOAT,
     temperature FLOAT,
     PRIMARY KEY (time, device_id)
@@ -60,19 +66,22 @@ SELECT create_hypertable('sensor_readings', 'time');
 -- Index for device-specific queries
 CREATE INDEX idx_sensor_readings_device_id ON sensor_readings(device_id, time DESC);
 
+-- Comment for raw_value column
+COMMENT ON COLUMN sensor_readings.raw_value IS 'Raw ADC value from HX711 sensor (uncalibrated)';
+
 -- ===== CONTINUOUS AGGREGATE FOR HOURLY STATISTICS =====
 CREATE MATERIALIZED VIEW sensor_readings_hourly
 WITH (timescaledb.continuous) AS
 SELECT
     time_bucket('1 hour', time) AS bucket,
     device_id,
-    AVG(weight) AS avg_weight,
+    AVG(raw_value) AS avg_raw_value,
+    MIN(raw_value) AS min_raw_value,
+    MAX(raw_value) AS max_raw_value,
     AVG(battery_voltage) AS avg_battery_voltage,
-    AVG(temperature) AS avg_temperature,
-    MIN(weight) AS min_weight,
-    MAX(weight) AS max_weight,
     MIN(battery_voltage) AS min_battery_voltage,
     MAX(battery_voltage) AS max_battery_voltage,
+    AVG(temperature) AS avg_temperature,
     MIN(temperature) AS min_temperature,
     MAX(temperature) AS max_temperature,
     COUNT(*) AS reading_count
@@ -88,6 +97,23 @@ SELECT add_continuous_aggregate_policy('sensor_readings_hourly',
 -- ===== DATA RETENTION POLICY =====
 -- Automatically drop data older than 1 year
 SELECT add_retention_policy('sensor_readings', INTERVAL '1 year');
+
+-- ===== HELPER VIEW FOR CALIBRATED READINGS =====
+-- Optional view that automatically applies calibration
+CREATE OR REPLACE VIEW sensor_readings_calibrated AS
+SELECT
+    sr.time,
+    sr.device_id,
+    sr.raw_value,
+    (sr.raw_value + COALESCE(d."offset", 0.0)) * COALESCE(d.gain, 1.0) AS weight,
+    sr.battery_voltage,
+    sr.temperature,
+    d."offset" AS device_offset,
+    d.gain AS device_gain
+FROM sensor_readings sr
+LEFT JOIN devices d ON sr.device_id = d.device_id;
+
+COMMENT ON VIEW sensor_readings_calibrated IS 'Sensor readings with calibration applied: weight = (raw_value + offset) * gain';
 
 -- ===== DEFAULT ADMIN USER =====
 -- Username: admin

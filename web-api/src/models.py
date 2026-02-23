@@ -31,6 +31,8 @@ class Device(Base):
     device_id = Column(String(50), unique=True, nullable=False, index=True)
     name = Column(String(100))
     description = Column(String)
+    offset = Column(Float, default=0.0, nullable=False, server_default="0.0")
+    gain = Column(Float, default=1.0, nullable=False, server_default="1.0")
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -57,6 +59,6 @@ class SensorReading(Base):
 
     time = Column(TIMESTAMP(timezone=True), primary_key=True)
     device_id = Column(String(50), primary_key=True, index=True)
-    weight = Column(Float, nullable=True)
+    raw_value = Column(Float, nullable=True)
     battery_voltage = Column(Float, nullable=True)
     temperature = Column(Float, nullable=True)
