@@ -17,7 +17,7 @@ const routes = [
   {
     path: '/device/:id',
     name: 'DeviceDetail',
-    component: () => import('@/views/DeviceDetailView.vue'),
+    component: () => import('@/views/DeviceDetailViewEnhanced.vue'),
     meta: { requiresAuth: true },
   },
   {
