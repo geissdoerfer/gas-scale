@@ -149,20 +149,11 @@
           </div>
 
           <div class="card">
-            <InteractiveChart
-              :data="chartData.battery"
-              title="Battery Voltage"
-              yAxisLabel="Voltage (V)"
-              unit="V"
-            />
-          </div>
-
-          <div class="card">
-            <InteractiveChart
-              :data="chartData.temperature"
-              title="Temperature"
-              yAxisLabel="Temperature (°C)"
-              unit="°C"
+            <BarChart
+              :data="chartData.consumption"
+              title="Consumption"
+              yAxisLabel="Consumption (g/min)"
+              unit="g/min"
             />
           </div>
         </template>
@@ -171,7 +162,7 @@
         <div v-if="chartView === 'combined' && combinedChartData" class="card">
           <InteractiveChart
             :data="combinedChartData"
-            title="All Metrics"
+            title="Weight & Consumption"
             :show-legend="true"
           />
         </div>
@@ -210,6 +201,7 @@ import { devicesAPI } from '@/services/api'
 import { format, formatDistanceToNow, subHours } from 'date-fns'
 import NavigationBar from '@/components/NavigationBar.vue'
 import InteractiveChart from '@/components/InteractiveChart.vue'
+import BarChart from '@/components/BarChart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -265,6 +257,51 @@ const chartData = computed(() => {
 
   const labels = readings.value.map(r => new Date(r.time))
 
+  // Calculate consumption: sum of weight deltas per 1-minute window
+  // Group readings by minute, then sum all negative deltas (consumption)
+  const minuteMap = new Map()
+
+  for (let i = 0; i < readings.value.length; i++) {
+    if (i === 0) continue // Skip first reading as it has no previous point
+
+    const currentWeight = readings.value[i].weight
+    const previousWeight = readings.value[i - 1].weight
+    const currentTime = new Date(readings.value[i].time)
+
+    // Round down to the minute - use the reading's timestamp
+    const minuteKey = new Date(Date.UTC(
+      currentTime.getUTCFullYear(),
+      currentTime.getUTCMonth(),
+      currentTime.getUTCDate(),
+      currentTime.getUTCHours(),
+      currentTime.getUTCMinutes(),
+      0, 0
+    ))
+
+    // Calculate weight delta
+    const weightDelta = currentWeight - previousWeight
+
+    // Sum up deltas for this minute
+    if (!minuteMap.has(minuteKey.getTime())) {
+      minuteMap.set(minuteKey.getTime(), { time: minuteKey, totalDelta: 0 })
+    }
+    minuteMap.get(minuteKey.getTime()).totalDelta += weightDelta
+  }
+
+  // Convert map to arrays for chart
+  const consumptionLabels = []
+  const consumptionData = []
+
+  // Sort by time
+  const sortedMinutes = Array.from(minuteMap.values()).sort((a, b) => a.time - b.time)
+
+  for (const minute of sortedMinutes) {
+    consumptionLabels.push(minute.time)
+    // Positive bar for negative delta (consumption), zero for positive delta
+    const consumption = minute.totalDelta > 25 ? minute.totalDelta : 0
+    consumptionData.push(consumption)
+  }
+
   return {
     weight: {
       labels,
@@ -276,24 +313,13 @@ const chartData = computed(() => {
         tension: 0.4,
       }],
     },
-    battery: {
-      labels,
+    consumption: {
+      labels: consumptionLabels,
       datasets: [{
-        label: 'Battery Voltage (V)',
-        data: readings.value.map(r => r.battery_voltage),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-      }],
-    },
-    temperature: {
-      labels,
-      datasets: [{
-        label: 'Temperature (°C)',
-        data: readings.value.map(r => r.temperature),
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        tension: 0.4,
+        label: 'Consumption (g/min)',
+        data: consumptionData,
+        borderColor: 'rgb(37, 99, 235)',
+        backgroundColor: 'rgba(37, 99, 235, 0.6)',
       }],
     },
   }
@@ -304,17 +330,66 @@ const combinedChartData = computed(() => {
 
   const labels = readings.value.map(r => new Date(r.time))
 
+  // Calculate consumption data: sum of weight deltas per 1-minute window
+  const minuteMap = new Map()
+
+  for (let i = 0; i < readings.value.length; i++) {
+    if (i === 0) continue
+
+    const currentWeight = readings.value[i].weight
+    const previousWeight = readings.value[i - 1].weight
+    const currentTime = new Date(readings.value[i].time)
+
+    // Round down to the minute - use the reading's timestamp
+    const minuteKey = new Date(Date.UTC(
+      currentTime.getUTCFullYear(),
+      currentTime.getUTCMonth(),
+      currentTime.getUTCDate(),
+      currentTime.getUTCHours(),
+      currentTime.getUTCMinutes(),
+      0, 0
+    ))
+
+    // Calculate weight delta
+    const weightDelta = currentWeight - previousWeight
+
+    // Sum up deltas for this minute
+    if (!minuteMap.has(minuteKey.getTime())) {
+      minuteMap.set(minuteKey.getTime(), { time: minuteKey, totalDelta: 0 })
+    }
+    minuteMap.get(minuteKey.getTime()).totalDelta += weightDelta
+  }
+
+  // Create consumption array matching weight data timestamps
+  // For combined view, we'll interpolate consumption data to match weight timestamps
+  const consumptionByMinute = new Map()
+  for (const [timestamp, data] of minuteMap.entries()) {
+    const consumption = data.totalDelta < 0 ? -data.totalDelta : 0
+    consumptionByMinute.set(timestamp, consumption)
+  }
+
+  // Map consumption to weight timestamps
+  const consumptionData = readings.value.map(r => {
+    const time = new Date(r.time)
+    const minuteKey = new Date(Date.UTC(
+      time.getUTCFullYear(),
+      time.getUTCMonth(),
+      time.getUTCDate(),
+      time.getUTCHours(),
+      time.getUTCMinutes(),
+      0, 0
+    )).getTime()
+    return consumptionByMinute.get(minuteKey) || 0
+  })
+
   // Normalize data to 0-100 scale for combined view
   const weightValues = readings.value.map(r => r.weight).filter(v => v != null)
-  const batteryValues = readings.value.map(r => r.battery_voltage).filter(v => v != null)
-  const tempValues = readings.value.map(r => r.temperature).filter(v => v != null)
+  const consumptionValues = consumptionData.filter(v => v != null && v > 0)
 
   const weightMin = Math.min(...weightValues)
   const weightMax = Math.max(...weightValues)
-  const batteryMin = Math.min(...batteryValues)
-  const batteryMax = Math.max(...batteryValues)
-  const tempMin = Math.min(...tempValues)
-  const tempMax = Math.max(...tempValues)
+  const consumptionMin = 0
+  const consumptionMax = consumptionValues.length > 0 ? Math.max(...consumptionValues) : 1
 
   const normalize = (value, min, max) => {
     if (max === min) return 50
@@ -333,18 +408,10 @@ const combinedChartData = computed(() => {
         yAxisID: 'y',
       },
       {
-        label: 'Battery',
-        data: readings.value.map(r => r.battery_voltage ? normalize(r.battery_voltage, batteryMin, batteryMax) : null),
+        label: 'Consumption',
+        data: consumptionData.map(c => c > 0 ? normalize(c, consumptionMin, consumptionMax) : 0),
         borderColor: 'rgb(16, 185, 129)',
         backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-        yAxisID: 'y',
-      },
-      {
-        label: 'Temperature',
-        data: readings.value.map(r => r.temperature ? normalize(r.temperature, tempMin, tempMax) : null),
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
         tension: 0.4,
         yAxisID: 'y',
       },

@@ -88,13 +88,8 @@
         </div>
 
         <div v-if="chartData" class="card">
-          <h3>Battery Voltage (V)</h3>
-          <LineChart :data="chartData.battery" />
-        </div>
-
-        <div v-if="chartData" class="card">
-          <h3>Temperature (°C)</h3>
-          <LineChart :data="chartData.temperature" />
+          <h3>Consumption (g/min)</h3>
+          <BarChart :data="chartData.consumption" />
         </div>
       </div>
     </div>
@@ -108,6 +103,7 @@ import { devicesAPI } from '@/services/api'
 import { format, formatDistanceToNow, subHours, subDays } from 'date-fns'
 import NavigationBar from '@/components/NavigationBar.vue'
 import LineChart from '@/components/LineChart.vue'
+import BarChart from '@/components/BarChart.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -146,6 +142,51 @@ const chartData = computed(() => {
 
   const labels = readings.value.map(r => new Date(r.time))
 
+  // Calculate consumption: sum of weight deltas per 1-minute window
+  // Group readings by minute, then sum all negative deltas (consumption)
+  const minuteMap = new Map()
+
+  for (let i = 0; i < readings.value.length; i++) {
+    if (i === 0) continue // Skip first reading as it has no previous point
+
+    const currentWeight = readings.value[i].weight
+    const previousWeight = readings.value[i - 1].weight
+    const currentTime = new Date(readings.value[i].time)
+
+    // Round down to the minute - use the reading's timestamp
+    const minuteKey = new Date(Date.UTC(
+      currentTime.getUTCFullYear(),
+      currentTime.getUTCMonth(),
+      currentTime.getUTCDate(),
+      currentTime.getUTCHours(),
+      currentTime.getUTCMinutes(),
+      0, 0
+    ))
+
+    // Calculate weight delta
+    const weightDelta = currentWeight - previousWeight
+
+    // Sum up deltas for this minute
+    if (!minuteMap.has(minuteKey.getTime())) {
+      minuteMap.set(minuteKey.getTime(), { time: minuteKey, totalDelta: 0 })
+    }
+    minuteMap.get(minuteKey.getTime()).totalDelta += weightDelta
+  }
+
+  // Convert map to arrays for chart
+  const consumptionLabels = []
+  const consumptionData = []
+
+  // Sort by time
+  const sortedMinutes = Array.from(minuteMap.values()).sort((a, b) => a.time - b.time)
+
+  for (const minute of sortedMinutes) {
+    consumptionLabels.push(minute.time)
+    // Positive bar for negative delta (consumption), zero for positive delta
+    const consumption = minute.totalDelta < 0 ? -minute.totalDelta : 0
+    consumptionData.push(consumption)
+  }
+
   return {
     weight: {
       labels,
@@ -157,24 +198,13 @@ const chartData = computed(() => {
         tension: 0.4,
       }],
     },
-    battery: {
-      labels,
+    consumption: {
+      labels: consumptionLabels,
       datasets: [{
-        label: 'Battery Voltage (V)',
-        data: readings.value.map(r => r.battery_voltage),
-        borderColor: 'rgb(16, 185, 129)',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-        tension: 0.4,
-      }],
-    },
-    temperature: {
-      labels,
-      datasets: [{
-        label: 'Temperature (°C)',
-        data: readings.value.map(r => r.temperature),
-        borderColor: 'rgb(239, 68, 68)',
-        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-        tension: 0.4,
+        label: 'Consumption (g/min)',
+        data: consumptionData,
+        borderColor: 'rgb(37, 99, 235)',
+        backgroundColor: 'rgba(37, 99, 235, 0.6)',
       }],
     },
   }
