@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "MyScale")(type "KiCad")(uri "${KIPRJMOD}/MyScale.kicad_sym")(options "")(descr ""))
+)
