@@ -8,6 +8,8 @@ fp-info-cache
 \#auto_saved_files#
 _autosave-*.kicad_pcb
 gerber/
+.history/
+*.lck
 
 *-panel.kicad_pcb
 *-panel.kicad_pro
