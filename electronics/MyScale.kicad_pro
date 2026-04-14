@@ -701,7 +701,7 @@
         "uuid": "b5eed584-7820-40e8-871b-2aa5dd8c83ec"
       }
     ],
-    "used_designators": "J8,R2,R5,R11-12,D2,C1,C4,C9-11,C17-19,Y1,#PWR47-63,U4-5",
+    "used_designators": "",
     "variants": []
   },
   "sheets": [
@@ -716,6 +716,10 @@
     [
       "77d04e5e-c205-4dc6-ba83-33ccd45504c6",
       "Load Cell Interface"
+    ],
+    [
+      "d79f2b7f-8f6c-4118-9551-ed509f2ef890",
+      "Radio"
     ]
   ],
   "text_variables": {},
