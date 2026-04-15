@@ -4203,7 +4203,7 @@
 				)
 			)
 		)
-		(property "Value" ""
+		(property "Value" "TXU0202"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4213,7 +4213,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_SO:VSSOP-8_2.3x2mm_P0.5mm"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
