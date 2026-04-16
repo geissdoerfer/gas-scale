@@ -1,0 +1,123 @@
+(footprint "MG_MAPM0420F"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Inductor SMD 2010 (5025 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf)")
+	(tags "inductor")
+	(property "Reference" "REF**"
+		(at 0 -2.28 0)
+		(layer "F.SilkS")
+		(uuid "ebd10c4a-366c-4221-8b24-66bca996e415")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MG_MAPM0420F"
+		(at 0 2.28 0)
+		(layer "F.Fab")
+		(uuid "bd6ed300-1a47-4546-9c11-6b11e3bb0ba9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a573d8ff-372e-4729-9414-eb453ff6b91a")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a22cdb53-1fd3-42a4-bb89-c55e766baea5")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "KiLib_Generator" "SMD_2terminal_chip_molded"
+		(at 0 0 0)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "459d139f-312e-4b64-bf4b-036bfe61ddd4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_rect
+		(start -3.15 -2.4)
+		(end 3.15 2.4)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "7aae02a7-3b97-4c6f-b089-102bfd4896e6")
+	)
+	(fp_rect
+		(start -2.45 -2.2)
+		(end 2.45 2.2)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.Fab")
+		(uuid "8745a67c-a632-459e-9da7-29f11da20e48")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "7c80f2b3-3899-4178-b999-0f921ef0d2c8")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -2.25 0)
+		(size 1.395 2.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "b740b8ef-68a0-40bb-a04b-08c606299aa6")
+	)
+	(pad "2" smd rect
+		(at 2.25 0)
+		(size 1.395 2.3)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e2c0acb7-1e47-476f-9796-fa1c3dea43cb")
+	)
+	(embedded_fonts no)
+	(model "${KICAD10_3DMODEL_DIR}/Inductor_SMD.3dshapes/L_2010_5025Metric.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)

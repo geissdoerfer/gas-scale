@@ -5779,7 +5779,7 @@
 				)
 			)
 		)
-		(property "Footprint" "solar-tag:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
+		(property "Footprint" "Connector:Tag-Connect_TC2030-IDC-NL_2x03_P1.27mm_Vertical"
 			(at 416.56 201.93 0)
 			(hide yes)
 			(show_name no)
