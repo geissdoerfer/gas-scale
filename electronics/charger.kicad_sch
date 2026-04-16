@@ -2445,7 +2445,7 @@
 		(uuid "0c5fbf43-109c-45b9-bcda-54ad4a61a289")
 	)
 	(no_connect
-		(at 91.44 97.79)
+		(at 91.44 87.63)
 		(uuid "73933af1-3a5e-4836-a753-4d08ebf29f31")
 	)
 	(wire
@@ -2950,7 +2950,7 @@
 	)
 	(wire
 		(pts
-			(xy 68.58 95.25) (xy 81.28 95.25)
+			(xy 68.58 90.17) (xy 81.28 90.17)
 		)
 		(stroke
 			(width 0)
@@ -3159,7 +3159,7 @@
 		(uuid "270f4481-db81-4cac-b59e-38ba851a3bc3")
 	)
 	(label "Vpack"
-		(at 68.58 95.25 0)
+		(at 68.58 90.17 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4912,7 +4912,7 @@
 	)
 	(symbol
 		(lib_id "Switch:SW_SPDT")
-		(at 86.36 95.25 0)
+		(at 86.36 90.17 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -4923,7 +4923,7 @@
 		(fields_autoplaced yes)
 		(uuid "7eb1e356-7596-4d99-8ce7-1b4d22922160")
 		(property "Reference" "SW3"
-			(at 86.36 86.36 0)
+			(at 86.36 81.28 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4933,7 +4933,7 @@
 			)
 		)
 		(property "Value" "SW_SPDT"
-			(at 86.36 88.9 0)
+			(at 86.36 83.82 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -4943,7 +4943,7 @@
 			)
 		)
 		(property "Footprint" "MyScale:CAK_AYZ0102AURLC"
-			(at 86.36 95.25 0)
+			(at 86.36 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4954,7 +4954,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 86.36 102.87 0)
+			(at 86.36 97.79 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4965,7 +4965,7 @@
 			)
 		)
 		(property "Description" "Switch, single pole double throw"
-			(at 86.36 95.25 0)
+			(at 86.36 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4976,7 +4976,7 @@
 			)
 		)
 		(property "MPN" "AYZ0102AURLC"
-			(at 86.36 95.25 0)
+			(at 86.36 90.17 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
