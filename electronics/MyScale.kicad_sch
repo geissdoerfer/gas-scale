@@ -4832,7 +4832,7 @@
 		)
 		(uuid "6f5190b8-b20f-4495-8882-36c1eea677dd")
 	)
-	(label "SWDCLK"
+	(label "SWCLK"
 		(at 430.53 204.47 0)
 		(effects
 			(font
