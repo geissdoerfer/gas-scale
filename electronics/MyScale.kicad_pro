@@ -142,7 +142,7 @@
         "min_silk_clearance": 0.0,
         "min_text_height": 0.8,
         "min_text_thickness": 0.08,
-        "min_through_hole_diameter": 0.3,
+        "min_through_hole_diameter": 0.25,
         "min_track_width": 0.15,
         "min_via_annular_width": 0.1,
         "min_via_diameter": 0.45,
@@ -195,9 +195,12 @@
       ],
       "track_widths": [
         0.0,
+        0.0,
         0.2,
+        0.245,
         0.3,
-        0.5
+        0.5,
+        1.0
       ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
@@ -504,7 +507,7 @@
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.2,
+        "clearance": 0.15,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -515,11 +518,22 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.2,
+        "track_width": 0.15,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
         "wire_width": 6
+      },
+      {
+        "clearance": 0.165,
+        "diff_pair_gap": 0.165,
+        "diff_pair_width": 0.23,
+        "name": "USB",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.23,
+        "tuning_profile": ""
       }
     ],
     "meta": {
@@ -527,7 +541,12 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": []
+    "netclass_patterns": [
+      {
+        "netclass": "USB",
+        "pattern": "*USBD*"
+      }
+    ]
   },
   "pcbnew": {
     "last_paths": {
@@ -647,6 +666,18 @@
           "label": "#",
           "name": "${ITEM_NUMBER}",
           "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Field5",
+          "name": "Field5",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Attributes",
+          "name": "Attributes",
+          "show": false
         }
       ],
       "filter_string": "",
@@ -705,7 +736,7 @@
         "uuid": "b5eed584-7820-40e8-871b-2aa5dd8c83ec"
       }
     ],
-    "used_designators": "SW1,Y1,U5",
+    "used_designators": "J8,#PWR28-29,R27-29",
     "variants": []
   },
   "sheets": [
