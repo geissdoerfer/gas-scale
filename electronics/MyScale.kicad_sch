@@ -7146,6 +7146,17 @@
 				)
 			)
 		)
+		(property "MPN" "STM32U083CCU6"
+			(at 212.09 104.14 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "45"
 			(uuid "1a518814-5826-4c8b-854f-23bfa5823fba")
 		)
@@ -8110,7 +8121,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "8578619e-f6d5-404c-8c10-7b5fe5726c0f")
 		(property "Reference" "R5"
 			(at 227.33 61.214 90)

@@ -4070,6 +4070,17 @@
 				)
 			)
 		)
+		(property "MPN" "TPS7A0533PDBV"
+			(at 82.55 161.29 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "4"
 			(uuid "a41bb30b-3119-448f-838c-9ab322b26597")
 		)
@@ -5969,7 +5980,7 @@
 				)
 			)
 		)
-		(property "MPN" "TXU0202"
+		(property "MPN" "TXU0202DCUR"
 			(at 229.87 72.39 0)
 			(hide yes)
 			(show_name no)

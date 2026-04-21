@@ -375,6 +375,19 @@
 				)
 			)
 		)
+		(property "MPN" "TPS7A0533PDBV"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "68a9c45d-3f8f-4d4d-9165-1853836ffe4c")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "SOT?23*")
 		(path "/77d04e5e-c205-4dc6-ba83-33ccd45504c6/36430bf4-706e-4f7d-bd0f-8da1c2ac98f4")
 		(sheetname "/Load Cell Interface/")
@@ -6575,6 +6588,19 @@
 				)
 			)
 		)
+		(property "MPN" "BQ25302RTER"
+			(at 0 0 180)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "8887a67c-ad89-4d19-b6eb-30a001c03c86")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "RTE0016C RTE0016C_NV")
 		(path "/1a9154dc-b6fe-4da1-bf65-fb214783b6b3/c3114e17-3a6e-4626-8b6c-49cbd9eb96fa")
 		(sheetname "/Charger/")
@@ -8098,6 +8124,19 @@
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "0c908f57-44dc-4b3c-88d0-d56e9d266277")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "TPS7A0518PDBV"
+			(at 0 0 270)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "409ef239-f0f9-4fe5-9b60-6aa419f5482d")
 			(effects
 				(font
 					(size 1 1)
@@ -11609,6 +11648,19 @@
 				)
 			)
 		)
+		(property "MPN" "A7670E-LASE"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "3eab4ceb-6aa3-4538-b630-304f1ab78122")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(path "/d79f2b7f-8f6c-4118-9551-ed509f2ef890/b28dc54d-1df8-4014-95a8-76e7828c0a33")
 		(sheetname "/Radio/")
 		(sheetfile "radio.kicad_sch")
@@ -11623,8 +11675,8 @@
 					"76" "75" "74" "73" "72" "71" "70" "45" "39" "29" "18" "17" "46" "36"
 					"44" "47" "51" "53" "52" "66" "38" "37" "25" "24" "28" "27" "13" "12"
 					"14" "11" "19" "20" "21" "49" "50" "48" "67" "68" "40" "41" "42" "43"
-					"107" "106" "105" "104" "103" "102" "101" "100" "90" "98" "97" "96"
-					"95" "116" "93"
+					"107" "106" "105" "104" "103" "102" "101" "90" "98" "97" "96" "95" "116"
+					"100" "93"
 				)
 			)
 		)
@@ -11869,7 +11921,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-DTR-Pad3)")
 			(pinfunction "DTR_3")
-			(pintype "input")
+			(pintype "input+no_connect")
 			(uuid "106c2b2a-1e52-4705-b310-3853e3b984af")
 		)
 		(pad "4" smd oval
@@ -12013,7 +12065,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO1-Pad19)")
 			(pinfunction "GPIO1_19")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "24a7c9af-99e1-4a00-887b-e7d834f9531e")
 		)
 		(pad "20" smd oval
@@ -12022,7 +12074,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO2-Pad20)")
 			(pinfunction "GPIO2_20")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "aa448dd5-310d-4ca9-adc5-36007d08ea5f")
 		)
 		(pad "21" smd oval
@@ -12031,7 +12083,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO3-Pad21)")
 			(pinfunction "GPIO3_21")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "a03956b1-8ab8-47c5-a833-794b449017be")
 		)
 		(pad "22" smd oval
@@ -12076,7 +12128,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad26)")
 			(pinfunction "NC_26")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "4247845a-6eea-44de-9a76-0da1f089fddf")
 		)
 		(pad "27" smd oval
@@ -12157,7 +12209,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad35)")
 			(pinfunction "NC_35")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "8d772fc3-e7df-4fa8-b466-cfed8ecf1271")
 		)
 		(pad "36" smd oval
@@ -12166,7 +12218,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad36)")
 			(pinfunction "NC_36")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "00e5acbd-c960-4280-a0d3-d2cfd1496dc8")
 		)
 		(pad "37" smd oval
@@ -12238,7 +12290,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad44)")
 			(pinfunction "NC_44")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "1b941daf-9843-4854-b5dd-4e1d689d7a30")
 		)
 		(pad "45" smd oval
@@ -12265,7 +12317,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad47)")
 			(pinfunction "NC_47")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "08bf5840-48fb-4b07-8be1-b7df61d294ab")
 		)
 		(pad "48" smd oval
@@ -12274,7 +12326,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO9-Pad48)")
 			(pinfunction "GPIO9_48")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "d2044439-6c56-49d2-8cf2-af5ecd0b4d12")
 		)
 		(pad "49" smd oval
@@ -12283,7 +12335,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO4-Pad49)")
 			(pinfunction "GPIO4_49")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "ed217f73-11b6-41de-ae7b-4c00db6bc5c9")
 		)
 		(pad "50" smd oval
@@ -12292,7 +12344,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO5-Pad50)")
 			(pinfunction "GPIO5_50")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "95872e00-c9ff-4f58-a188-66905616dae7")
 		)
 		(pad "51" smd oval
@@ -12301,7 +12353,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad51)")
 			(pinfunction "NC_51")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "7fc23c46-db87-4fff-8f22-c415fef5caf1")
 		)
 		(pad "52" smd oval
@@ -12319,7 +12371,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad53)")
 			(pinfunction "NC_53")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "de18ff8b-7cd4-4610-b504-508b8b513277")
 		)
 		(pad "54" smd oval
@@ -12445,7 +12497,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO10-Pad67)")
 			(pinfunction "GPIO10_67")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "c34011d5-dbf6-4b13-9016-d7b2cb58ced5")
 		)
 		(pad "68" smd oval
@@ -12454,7 +12506,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-GPIO11-Pad68)")
 			(pinfunction "GPIO11_68")
-			(pintype "bidirectional")
+			(pintype "bidirectional+no_connect")
 			(uuid "7ec42d24-b484-4829-b965-996a0c39a6fa")
 		)
 		(pad "69" smd rect
@@ -12742,7 +12794,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-1PPS-Pad100)")
 			(pinfunction "1PPS_100")
-			(pintype "unspecified")
+			(pintype "unspecified+no_connect")
 			(uuid "a6f0cc9c-eda6-4eb4-aee9-23da6bdf3131")
 		)
 		(pad "101" smd rect
@@ -12859,7 +12911,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad113)")
 			(pinfunction "NC_113")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "38801c10-51f3-4451-8acd-d883478dcd3d")
 		)
 		(pad "114" smd rect
@@ -12868,7 +12920,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad114)")
 			(pinfunction "NC_114")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "cd7b647a-69ba-4e9d-87db-8b36c27bd4cb")
 		)
 		(pad "115" smd rect
@@ -12877,7 +12929,7 @@
 			(layers "F.Cu" "F.Mask" "F.Paste")
 			(net "unconnected-(U4-NC-Pad115)")
 			(pinfunction "NC_115")
-			(pintype "passive")
+			(pintype "no_connect")
 			(uuid "41a1e43f-2009-419e-b0fe-390d49fed57d")
 		)
 		(pad "116" smd rect
@@ -16125,7 +16177,7 @@
 				(pins "1" "2")
 			)
 		)
-		(attr smd)
+		(attr smd dnp)
 		(duplicate_pad_numbers_are_jumpers no)
 		(fp_line
 			(start -0.237258 -0.5225)
@@ -19006,7 +19058,7 @@
 				)
 			)
 		)
-		(property "Value" "100k"
+		(property "Value" "20k"
 			(at 0 1.43 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -19603,6 +19655,19 @@
 			(layer "F.SilkS")
 			(hide yes)
 			(uuid "b8a668cc-45c7-4727-9712-8aa54c128a9e")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "STM32U083CCU6"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "6160232b-d239-4650-ab60-05f13d87b216")
 			(effects
 				(font
 					(size 1 1)
@@ -20894,7 +20959,7 @@
 				)
 			)
 		)
-		(property "MPN" "TXU0202"
+		(property "MPN" "TXU0202DCUR"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -21756,6 +21821,19 @@
 				)
 			)
 		)
+		(property "MPN" "NSIM-2-C"
+			(at 0 0 270)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ca3e0993-a898-41b8-8f8f-da0268c9956f")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "*SIM*Card*Holder*")
 		(path "/d79f2b7f-8f6c-4118-9551-ed509f2ef890/249f98d9-18ba-4d78-85a3-9c98431b4f82")
 		(sheetname "/Radio/")
@@ -22390,7 +22468,7 @@
 				)
 			)
 		)
-		(property "Value" "24k"
+		(property "Value" "20k"
 			(at 0 1.17 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -26473,30 +26551,6 @@
 		(uuid "17a3683a-e924-4ae7-bc37-13dfb38b48db")
 	)
 	(segment
-		(start 88.34 123.91)
-		(end 88.35 123.9)
-		(width 0.245)
-		(layer "F.Cu")
-		(net "/Radio/RfAnt")
-		(uuid "63141d6b-30f2-4e82-96b2-2e2ba393f320")
-	)
-	(segment
-		(start 88.37 123.92)
-		(end 88.35 123.9)
-		(width 0.245)
-		(layer "F.Cu")
-		(net "/Radio/RfAnt")
-		(uuid "6ce778cf-ddcf-48e3-bd18-5133644377b1")
-	)
-	(segment
-		(start 88.34 127.455)
-		(end 88.34 123.91)
-		(width 0.35)
-		(layer "F.Cu")
-		(net "/Radio/RfAnt")
-		(uuid "83f05e30-06e5-427b-a7da-456aefa79215")
-	)
-	(segment
 		(start 116.91 166.075)
 		(end 117.56 165.425)
 		(width 0.2)
@@ -26659,6 +26713,62 @@
 		(uuid "f50d5f74-878c-4f4b-a9ab-e272e23ea6b9")
 	)
 	(segment
+		(start 74.55 150.1)
+		(end 74.55 151.4)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "bdbf72a7-44ad-4447-b6d7-d43b09cd70e2")
+	)
+	(segment
+		(start 96.34 150.11)
+		(end 96.35 150.1)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "cdae6bd6-2554-433e-9856-1be2fefe5fc3")
+	)
+	(segment
+		(start 96.34 151.455)
+		(end 96.34 150.11)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "d3e31ddc-3cc7-4e78-a06c-d6f16fa2c9da")
+	)
+	(via
+		(at 74.55 150.1)
+		(size 0.45)
+		(drill 0.25)
+		(layers "F.Cu" "B.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "55bd622e-c01d-42f0-9c0b-fcd119c2cd14")
+	)
+	(via
+		(at 96.35 150.1)
+		(size 0.45)
+		(drill 0.25)
+		(layers "F.Cu" "B.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "771421fd-3a64-42c1-9965-b5a45ced5f4c")
+	)
+	(segment
+		(start 96.35 150.1)
+		(end 74.55 150.1)
+		(width 0.2)
+		(layer "B.Cu")
+		(net "Net-(U4-USIM_DET)")
+		(uuid "3267651c-14d0-4c95-a540-3e3419a33209")
+	)
+	(segment
+		(start 74.55 153.05)
+		(end 74.55 154.995)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/Radio/SimDet")
+		(uuid "94fbd00b-cd34-4078-8818-436c77ab4d4c")
+	)
+	(segment
 		(start 127.296783 145.075)
 		(end 127.171783 145.2)
 		(width 1)
@@ -26745,6 +26855,30 @@
 		(layer "B.Cu")
 		(net "/Radio/VbatModule")
 		(uuid "acaf038d-c8d4-40b9-a95e-2119543e4385")
+	)
+	(segment
+		(start 88.34 123.91)
+		(end 88.35 123.9)
+		(width 0.245)
+		(layer "F.Cu")
+		(net "/Radio/RfAnt")
+		(uuid "63141d6b-30f2-4e82-96b2-2e2ba393f320")
+	)
+	(segment
+		(start 88.37 123.92)
+		(end 88.35 123.9)
+		(width 0.245)
+		(layer "F.Cu")
+		(net "/Radio/RfAnt")
+		(uuid "6ce778cf-ddcf-48e3-bd18-5133644377b1")
+	)
+	(segment
+		(start 88.34 127.455)
+		(end 88.34 123.91)
+		(width 0.35)
+		(layer "F.Cu")
+		(net "/Radio/RfAnt")
+		(uuid "83f05e30-06e5-427b-a7da-456aefa79215")
 	)
 	(segment
 		(start 116.39 158.725)
@@ -28143,6 +28277,38 @@
 		(uuid "c65361e2-ad9c-4a4c-aa64-997cf2771d75")
 	)
 	(segment
+		(start 85.34 152.99)
+		(end 85.35 153)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "Net-(U4-UART_LOG_TXD)")
+		(uuid "9948b5cb-9fa9-4a05-9a89-d3ef4448768c")
+	)
+	(segment
+		(start 85.34 151.455)
+		(end 85.34 152.99)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "Net-(U4-UART_LOG_TXD)")
+		(uuid "a6b7bb8b-e618-4def-a158-962c20060a65")
+	)
+	(via
+		(at 85.35 153)
+		(size 0.45)
+		(drill 0.25)
+		(layers "F.Cu" "B.Cu")
+		(net "Net-(U4-UART_LOG_TXD)")
+		(uuid "ba659e67-de4f-4de3-83da-12d309125df6")
+	)
+	(segment
+		(start 85.35 153)
+		(end 85.35 154.4)
+		(width 0.2)
+		(layer "B.Cu")
+		(net "Net-(U4-UART_LOG_TXD)")
+		(uuid "91bfd5aa-68f1-4bf6-bc88-083941181777")
+	)
+	(segment
 		(start 86.34 152.79)
 		(end 86.35 152.8)
 		(width 0.3)
@@ -29183,30 +29349,6 @@
 		(uuid "a668b3a6-5825-4845-98a1-a6a43d7acdaa")
 	)
 	(segment
-		(start 117.1 142.15)
-		(end 117.1 149.075)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/Dout")
-		(uuid "3574224b-9c24-47af-9c3e-2720a612ef26")
-	)
-	(segment
-		(start 116.805 141.855)
-		(end 116.04 141.855)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/Dout")
-		(uuid "d1040258-a2a3-4dd4-a5f5-19472838aedc")
-	)
-	(segment
-		(start 117.1 142.15)
-		(end 116.805 141.855)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/Dout")
-		(uuid "d4123bfb-364b-4298-9c5a-294159b6e8e6")
-	)
-	(segment
 		(start 116.04 142.99)
 		(end 116.5 143.45)
 		(width 0.2)
@@ -29245,6 +29387,30 @@
 		(layer "F.Cu")
 		(net "/Sck")
 		(uuid "efda888f-1aa8-4add-811f-4fdb60176e14")
+	)
+	(segment
+		(start 117.1 142.15)
+		(end 117.1 149.075)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/Dout")
+		(uuid "3574224b-9c24-47af-9c3e-2720a612ef26")
+	)
+	(segment
+		(start 116.805 141.855)
+		(end 116.04 141.855)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/Dout")
+		(uuid "d1040258-a2a3-4dd4-a5f5-19472838aedc")
+	)
+	(segment
+		(start 117.1 142.15)
+		(end 116.805 141.855)
+		(width 0.2)
+		(layer "F.Cu")
+		(net "/Dout")
+		(uuid "d4123bfb-364b-4298-9c5a-294159b6e8e6")
 	)
 	(segment
 		(start 113.8525 136.1675)
@@ -29325,94 +29491,6 @@
 		(layer "B.Cu")
 		(net "/RadioEnable")
 		(uuid "46c1131b-6d34-4925-b04b-6e17044f467a")
-	)
-	(segment
-		(start 74.55 153.05)
-		(end 74.55 154.995)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "/Radio/SimDet")
-		(uuid "94fbd00b-cd34-4078-8818-436c77ab4d4c")
-	)
-	(segment
-		(start 74.55 150.1)
-		(end 74.55 151.4)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "bdbf72a7-44ad-4447-b6d7-d43b09cd70e2")
-	)
-	(segment
-		(start 96.34 150.11)
-		(end 96.35 150.1)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "cdae6bd6-2554-433e-9856-1be2fefe5fc3")
-	)
-	(segment
-		(start 96.34 151.455)
-		(end 96.34 150.11)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "d3e31ddc-3cc7-4e78-a06c-d6f16fa2c9da")
-	)
-	(via
-		(at 74.55 150.1)
-		(size 0.45)
-		(drill 0.25)
-		(layers "F.Cu" "B.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "55bd622e-c01d-42f0-9c0b-fcd119c2cd14")
-	)
-	(via
-		(at 96.35 150.1)
-		(size 0.45)
-		(drill 0.25)
-		(layers "F.Cu" "B.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "771421fd-3a64-42c1-9965-b5a45ced5f4c")
-	)
-	(segment
-		(start 96.35 150.1)
-		(end 74.55 150.1)
-		(width 0.2)
-		(layer "B.Cu")
-		(net "Net-(U4-USIM_DET)")
-		(uuid "3267651c-14d0-4c95-a540-3e3419a33209")
-	)
-	(segment
-		(start 85.34 152.99)
-		(end 85.35 153)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "Net-(U4-UART_LOG_TXD)")
-		(uuid "9948b5cb-9fa9-4a05-9a89-d3ef4448768c")
-	)
-	(segment
-		(start 85.34 151.455)
-		(end 85.34 152.99)
-		(width 0.2)
-		(layer "F.Cu")
-		(net "Net-(U4-UART_LOG_TXD)")
-		(uuid "a6b7bb8b-e618-4def-a158-962c20060a65")
-	)
-	(via
-		(at 85.35 153)
-		(size 0.45)
-		(drill 0.25)
-		(layers "F.Cu" "B.Cu")
-		(net "Net-(U4-UART_LOG_TXD)")
-		(uuid "ba659e67-de4f-4de3-83da-12d309125df6")
-	)
-	(segment
-		(start 85.35 153)
-		(end 85.35 154.4)
-		(width 0.2)
-		(layer "B.Cu")
-		(net "Net-(U4-UART_LOG_TXD)")
-		(uuid "91bfd5aa-68f1-4bf6-bc88-083941181777")
 	)
 	(zone
 		(net "VBUS")

@@ -5818,7 +5818,7 @@
 				)
 			)
 		)
-		(property "Value" "100k"
+		(property "Value" "20k"
 			(at 123.19 98.1964 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6023,6 +6023,17 @@
 				)
 			)
 		)
+		(property "MPN" "TPS7A0518PDBV"
+			(at 137.16 95.25 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "327b8bb1-3c94-4495-8c2b-00a6f4158b37")
 		)
@@ -6070,7 +6081,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Q_NMOS_GSD"
+		(property "Value" "SI2302CDS"
 			(at 101.6 135.8899 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6104,6 +6115,17 @@
 			)
 		)
 		(property "Description" "N-MOSFET transistor, gate/source/drain"
+			(at 95.25 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SI2302CDS-T1-GE3"
 			(at 95.25 134.62 0)
 			(hide yes)
 			(show_name no)
@@ -6266,6 +6288,17 @@
 			)
 		)
 		(property "Description" ""
+			(at 228.6 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "BQ25302RTER"
 			(at 228.6 55.88 0)
 			(hide yes)
 			(show_name no)

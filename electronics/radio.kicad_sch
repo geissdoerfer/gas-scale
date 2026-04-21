@@ -7059,6 +7059,17 @@
 				)
 			)
 		)
+		(property "MPN" "NSIM-2-C"
+			(at 259.08 92.71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "5"
 			(uuid "5f4743ec-2f73-470c-9434-aa7a9345c8c1")
 		)
@@ -8717,7 +8728,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "24k"
+		(property "Value" "20k"
 			(at -70.612 189.23 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9070,6 +9081,17 @@
 			)
 		)
 		(property "Description" ""
+			(at 124.46 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "A7670E-LASE"
 			(at 124.46 123.19 0)
 			(hide yes)
 			(show_name no)
@@ -9720,7 +9742,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Q_NMOS_GSD"
+		(property "Value" "SI2302CDS"
 			(at 25.4 102.8699 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9754,6 +9776,17 @@
 			)
 		)
 		(property "Description" "N-MOSFET transistor, gate/source/drain"
+			(at 19.05 101.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SI2302CDS-T1-GE3"
 			(at 19.05 101.6 0)
 			(hide yes)
 			(show_name no)
@@ -10153,6 +10186,17 @@
 		)
 		(property "Description" "Push button switch, generic, two pins"
 			(at 45.72 101.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TL3305AF160QG"
+			(at 45.72 101.6 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
