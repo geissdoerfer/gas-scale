@@ -182,281 +182,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector:SIM_Card"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at -2.54 12.7 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify right)
-				)
-			)
-			(property "Value" "SIM_Card"
-				(at -1.27 10.16 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify right)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at -1.27 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "SIM Card"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "SIM card UICC"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "*SIM*Card*Holder*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "SIM_Card_0_1"
-				(polyline
-					(pts
-						(xy -10.16 8.89) (xy 15.24 8.89) (xy 15.24 -3.81) (xy 12.7 -6.35) (xy -10.16 -6.35) (xy -10.16 8.89)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(rectangle
-					(start -1.27 2.54)
-					(end 2.54 3.81)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start -1.27 0)
-					(end 2.54 1.27)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start -1.27 -2.54)
-					(end 2.54 -1.27)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start 3.81 2.54)
-					(end 7.62 3.81)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start 3.81 0)
-					(end 7.62 1.27)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(rectangle
-					(start 3.81 -1.27)
-					(end 7.62 -2.54)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-			)
-			(symbol "SIM_Card_1_1"
-				(pin power_in line
-					(at -12.7 7.62 0)
-					(length 2.54)
-					(name "VCC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -12.7 5.08 0)
-					(length 2.54)
-					(name "RST"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -12.7 2.54 0)
-					(length 2.54)
-					(name "CLK"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at -12.7 0 0)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -12.7 -2.54 0)
-					(length 2.54)
-					(name "VPP"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -12.7 -5.08 0)
-					(length 2.54)
-					(name "I/O"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Connector:TestPoint"
 			(pin_numbers
 				(hide yes)
@@ -2034,7 +1759,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -57.15 180)
+					(at 25.4 -54.61 180)
 					(length 2.54)
 					(name "GNSS_ANT"
 						(effects
@@ -2070,7 +1795,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -67.31 180)
+					(at 25.4 -64.77 180)
 					(length 2.54)
 					(name "GNSS_TXD"
 						(effects
@@ -2088,7 +1813,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -64.77 180)
+					(at 25.4 -62.23 180)
 					(length 2.54)
 					(name "GNSS_RXD"
 						(effects
@@ -2106,7 +1831,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -62.23 180)
+					(at 25.4 -59.69 180)
 					(length 2.54)
 					(name "1V8_GNSS"
 						(effects
@@ -2124,7 +1849,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -59.69 180)
+					(at 25.4 -57.15 180)
 					(length 2.54)
 					(name "GNSS_PWRCTL"
 						(effects
@@ -2160,7 +1885,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -52.07 180)
+					(at 25.4 -69.85 180)
 					(length 2.54)
 					(name "1PPS"
 						(effects
@@ -2394,7 +2119,7 @@
 					)
 				)
 				(pin unspecified line
-					(at 25.4 -69.85 180)
+					(at 25.4 -67.31 180)
 					(length 2.54)
 					(name "GNSS_VBKP"
 						(effects
@@ -3317,7 +3042,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at -8.89 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3336,7 +3061,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at -7.62 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3355,7 +3080,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at -6.35 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3387,7 +3112,7 @@
 						(type background)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at -5.08 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3424,7 +3149,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at -3.81 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3443,7 +3168,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at 3.81 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3534,7 +3259,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at 5.08 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3553,7 +3278,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at 6.35 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3572,7 +3297,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at 7.62 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3591,7 +3316,7 @@
 						)
 					)
 				)
-				(pin passive line
+				(pin no_connect line
 					(at 8.89 -77.47 90)
 					(length 2.54)
 					(hide yes)
@@ -3603,6 +3328,317 @@
 						)
 					)
 					(number "53"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "MyScale:SIM_Card_Shielded_Det"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at -2.54 13.97 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Value" "SIM_Card_Shielded_Det"
+				(at -1.27 11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 8.89 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at -1.27 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "SIM Card"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "SIM card UICC"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "*SIM*Card*Holder*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "SIM_Card_Shielded_Det_0_1"
+				(polyline
+					(pts
+						(xy -10.16 10.16) (xy -10.16 -10.16) (xy 12.7 -10.16) (xy 15.24 -5.08) (xy 15.24 10.16) (xy -10.16 10.16)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 2.54)
+					(end 2.54 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start -1.27 0)
+					(end 2.54 1.27)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.54)
+					(end 2.54 -1.27)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 3.81 2.54)
+					(end 7.62 3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 3.81 0)
+					(end 7.62 1.27)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+				(rectangle
+					(start 3.81 -1.27)
+					(end 7.62 -2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type outline)
+					)
+				)
+			)
+			(symbol "SIM_Card_Shielded_Det_1_1"
+				(pin power_in line
+					(at -12.7 8.89 0)
+					(length 2.54)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 6.35 0)
+					(length 2.54)
+					(name "RST"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 3.81 0)
+					(length 2.54)
+					(name "CLK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -12.7 1.27 0)
+					(length 2.54)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -1.27 0)
+					(length 2.54)
+					(name "VPP"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -12.7 -3.81 0)
+					(length 2.54)
+					(name "I/O"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -12.7 -8.89 0)
+					(length 2.54)
+					(name "CD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "CD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -12.7 -6.35 0)
+					(length 2.54)
+					(name "SH"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "SH"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4825,6 +4861,12 @@
 		(uuid "593c3b95-b963-4c36-860a-80e5b420741b")
 	)
 	(junction
+		(at 243.84 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6e6ae0a2-f6b9-4bb5-9f33-2634b0c7e094")
+	)
+	(junction
 		(at -52.07 162.56)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4919,8 +4961,8 @@
 		(uuid "139ebc1f-75e5-46ae-8bff-893477fe4b4a")
 	)
 	(no_connect
-		(at 99.06 147.32)
-		(uuid "1936adbf-a5ad-4fff-81f2-aa1ef26d9d69")
+		(at 149.86 119.38)
+		(uuid "1875a7cb-b6a3-4903-8bb7-548b776c46fa")
 	)
 	(no_connect
 		(at 149.86 170.18)
@@ -4951,12 +4993,16 @@
 		(uuid "356ed936-22f7-433b-b71c-1d7f40225b74")
 	)
 	(no_connect
-		(at 149.86 180.34)
+		(at 149.86 177.8)
 		(uuid "3b311d63-3b22-4021-b3ef-43db0cac4462")
 	)
 	(no_connect
 		(at 149.86 185.42)
 		(uuid "3b5d011b-e37b-47a2-b5f3-8bf994b6377a")
+	)
+	(no_connect
+		(at 149.86 129.54)
+		(uuid "3edb720f-14d8-49d4-8201-0432cdfff4bb")
 	)
 	(no_connect
 		(at 99.06 160.02)
@@ -4965,10 +5011,6 @@
 	(no_connect
 		(at 99.06 149.86)
 		(uuid "41a8b5e3-708a-4a95-be7c-df3e88c3efd5")
-	)
-	(no_connect
-		(at 99.06 124.46)
-		(uuid "436cb7a5-1a2b-4689-b69b-9d45bb26ff56")
 	)
 	(no_connect
 		(at 149.86 162.56)
@@ -4997,6 +5039,10 @@
 	(no_connect
 		(at 149.86 157.48)
 		(uuid "55ed0d44-2064-4c71-b6c0-9995e167eca2")
+	)
+	(no_connect
+		(at 149.86 134.62)
+		(uuid "5a744b8b-3563-4ac5-82ab-f4077ff6090b")
 	)
 	(no_connect
 		(at 149.86 149.86)
@@ -5031,6 +5077,18 @@
 		(uuid "842de931-f5f4-4869-98a6-58e564c6d809")
 	)
 	(no_connect
+		(at 99.06 109.22)
+		(uuid "86a2fdc7-df36-4e55-a366-678643aed999")
+	)
+	(no_connect
+		(at 149.86 127)
+		(uuid "8c30f892-d362-4b2b-9727-c1452bb5803b")
+	)
+	(no_connect
+		(at 149.86 121.92)
+		(uuid "8c9d8fea-3b3d-4600-baca-cd37e92bf085")
+	)
+	(no_connect
 		(at 99.06 167.64)
 		(uuid "94ba2da6-cc9f-4fd3-8a98-e8fa0c083ad6")
 	)
@@ -5043,8 +5101,16 @@
 		(uuid "a327b9e5-4046-490e-a2eb-9c80150e788a")
 	)
 	(no_connect
+		(at 149.86 124.46)
+		(uuid "afda2487-a201-437b-8be5-a1f205149d3e")
+	)
+	(no_connect
 		(at 149.86 193.04)
 		(uuid "b5c85a86-deed-4487-964d-ae626fe024eb")
+	)
+	(no_connect
+		(at 149.86 182.88)
+		(uuid "b5d9ea1f-d452-47a5-934c-b25ab807708e")
 	)
 	(no_connect
 		(at 99.06 165.1)
@@ -5053,6 +5119,10 @@
 	(no_connect
 		(at 99.06 104.14)
 		(uuid "b809046c-128b-410a-8f0b-71448c8221ad")
+	)
+	(no_connect
+		(at 149.86 132.08)
+		(uuid "c02112cf-2274-4056-a310-270dfbdb6506")
 	)
 	(no_connect
 		(at 149.86 111.76)
@@ -5095,6 +5165,10 @@
 		(uuid "e7422d4d-af5d-47a4-8bd8-fdf388a55687")
 	)
 	(no_connect
+		(at 149.86 137.16)
+		(uuid "efa7d401-93da-453e-8a9f-71a6ec1e7ceb")
+	)
+	(no_connect
 		(at 99.06 185.42)
 		(uuid "fbb90d4e-d4af-42a0-a4fa-3087d3a39388")
 	)
@@ -5117,6 +5191,16 @@
 			(type default)
 		)
 		(uuid "09f168e8-6532-4718-96ce-1be9ccae98fe")
+	)
+	(wire
+		(pts
+			(xy 154.94 180.34) (xy 149.86 180.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0a05964b-d78d-4615-b863-004b7c2c7838")
 	)
 	(wire
 		(pts
@@ -5280,6 +5364,16 @@
 	)
 	(wire
 		(pts
+			(xy 243.84 99.06) (xy 246.38 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "272d373e-b7f1-499b-8209-557fd840fe1e")
+	)
+	(wire
+		(pts
 			(xy 217.17 106.68) (xy 217.17 109.22)
 		)
 		(stroke
@@ -5287,16 +5381,6 @@
 			(type default)
 		)
 		(uuid "29190c14-a24b-4f48-9dfe-3064edacb7e7")
-	)
-	(wire
-		(pts
-			(xy 154.94 182.88) (xy 149.86 182.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "29d67c2e-4217-4d90-8fa5-5797be0f9332")
 	)
 	(wire
 		(pts
@@ -5460,6 +5544,16 @@
 	)
 	(wire
 		(pts
+			(xy 154.94 180.34) (xy 154.94 205.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "58a46218-b91f-42a1-812e-ffca3a8ab039")
+	)
+	(wire
+		(pts
 			(xy -46.99 162.56) (xy -52.07 162.56)
 		)
 		(stroke
@@ -5540,16 +5634,6 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 205.74) (xy 154.94 182.88)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "6e6f3b9e-56fb-4862-a3e9-8dd09ac7cea5")
-	)
-	(wire
-		(pts
 			(xy 86.36 96.52) (xy 99.06 96.52)
 		)
 		(stroke
@@ -5580,6 +5664,16 @@
 	)
 	(wire
 		(pts
+			(xy 86.36 124.46) (xy 99.06 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "76cc4ae6-294e-4f00-b619-2f581b8aa2d4")
+	)
+	(wire
+		(pts
 			(xy 246.38 83.82) (xy 242.57 83.82)
 		)
 		(stroke
@@ -5607,6 +5701,16 @@
 			(type default)
 		)
 		(uuid "802a4ece-e482-4d64-b4e7-5960b34aa7e7")
+	)
+	(wire
+		(pts
+			(xy 243.84 99.06) (xy 243.84 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "832f276e-e72e-4fbf-91c5-dedc76e5189b")
 	)
 	(wire
 		(pts
@@ -5690,7 +5794,7 @@
 	)
 	(wire
 		(pts
-			(xy 238.76 21.59) (xy 241.3 21.59)
+			(xy 238.76 21.59) (xy 251.46 21.59)
 		)
 		(stroke
 			(width 0)
@@ -5800,16 +5904,6 @@
 	)
 	(wire
 		(pts
-			(xy 248.92 21.59) (xy 251.46 21.59)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a646949e-5ae3-482b-a083-ce56b284b0e2")
-	)
-	(wire
-		(pts
 			(xy 177.8 132.08) (xy 177.8 138.43)
 		)
 		(stroke
@@ -5860,6 +5954,16 @@
 	)
 	(wire
 		(pts
+			(xy 78.74 147.32) (xy 99.06 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b2065f14-4f12-4cee-9c6e-656fe3c570bb")
+	)
+	(wire
+		(pts
 			(xy 21.59 88.9) (xy 45.72 88.9)
 		)
 		(stroke
@@ -5887,6 +5991,26 @@
 			(type default)
 		)
 		(uuid "bd12a123-5e8b-4a61-b3b6-ba1f7d417749")
+	)
+	(wire
+		(pts
+			(xy 233.68 101.6) (xy 246.38 101.6)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bd74f271-234d-4f98-b2c7-bfff8ed96529")
+	)
+	(wire
+		(pts
+			(xy 67.31 124.46) (xy 78.74 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "be21e8ef-cba3-4141-aa82-5bc0461f9894")
 	)
 	(wire
 		(pts
@@ -6070,7 +6194,7 @@
 	)
 	(wire
 		(pts
-			(xy 243.84 101.6) (xy 243.84 91.44)
+			(xy 243.84 106.68) (xy 243.84 99.06)
 		)
 		(stroke
 			(width 0)
@@ -6358,6 +6482,16 @@
 		)
 		(uuid "b9f7e7cc-cf84-460b-abc3-b94382330ee2")
 	)
+	(label "SimDet"
+		(at 233.68 101.6 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d85e86b0-806e-41b6-b5b7-991792714bca")
+	)
 	(label "SimClk"
 		(at 90.17 116.84 0)
 		(effects
@@ -6367,6 +6501,16 @@
 			(justify left bottom)
 		)
 		(uuid "e615ce2b-ecc4-4f42-af71-c143070371d6")
+	)
+	(label "SimDet"
+		(at 67.31 124.46 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "e8265e36-ecfa-4659-9494-05ee61c88c3e")
 	)
 	(label "Reset"
 		(at 25.4 43.18 90)
@@ -6772,10 +6916,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "203d53f5-ac03-444f-a8e6-78faea12d8df")
 		(property "Reference" "C3"
@@ -6849,8 +6993,8 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:SIM_Card")
-		(at 259.08 91.44 0)
+		(lib_id "MyScale:SIM_Card_Shielded_Det")
+		(at 259.08 92.71 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6861,17 +7005,6 @@
 		(fields_autoplaced yes)
 		(uuid "249f98d9-18ba-4d78-85a3-9c98431b4f82")
 		(property "Reference" "J7"
-			(at 275.59 88.8999 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "SIM_Card"
 			(at 275.59 91.4399 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6882,8 +7015,19 @@
 				(justify left)
 			)
 		)
+		(property "Value" "SIM_Card"
+			(at 275.59 93.9799 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
 		(property "Footprint" "Connector_Card:nanoSIM_Hinged_CUI_NSIM-2-C"
-			(at 259.08 82.55 0)
+			(at 259.08 83.82 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6894,7 +7038,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 257.81 91.44 0)
+			(at 257.81 92.71 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6905,7 +7049,7 @@
 			)
 		)
 		(property "Description" "SIM Card"
-			(at 259.08 91.44 0)
+			(at 259.08 92.71 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6932,6 +7076,12 @@
 		)
 		(pin "1"
 			(uuid "fd5617cc-0f38-4898-b56e-77f4897fb3eb")
+		)
+		(pin "SH"
+			(uuid "ca27b11c-cc8f-42e1-8477-25ab81dec242")
+		)
+		(pin "CD"
+			(uuid "1bd6bce2-b91c-4f21-ad17-528ff30e43a4")
 		)
 		(instances
 			(project "MyScale"
@@ -7626,7 +7776,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 78.74 130.81 0)
 			(hide yes)
 			(show_name no)
@@ -7758,10 +7908,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
+		(in_bom no)
+		(on_board no)
+		(in_pos_files no)
+		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "72de9906-9ddc-4ffa-89e8-9fd5f88d8791")
 		(property "Reference" "C7"
@@ -8156,7 +8306,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 243.84 101.6 0)
+		(at 243.84 106.68 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -8166,7 +8316,7 @@
 		(dnp no)
 		(uuid "7f5fef8e-0d1a-4598-814f-379452610ba1")
 		(property "Reference" "#PWR065"
-			(at 243.84 107.95 0)
+			(at 243.84 113.03 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8177,7 +8327,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 243.84 105.41 0)
+			(at 243.84 110.49 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8187,7 +8337,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 243.84 101.6 0)
+			(at 243.84 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8198,7 +8348,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 243.84 101.6 0)
+			(at 243.84 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8209,7 +8359,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 243.84 101.6 0)
+			(at 243.84 106.68 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9711,6 +9861,86 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 82.55 124.46 270)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp yes)
+		(fields_autoplaced yes)
+		(uuid "bb72b7f9-3f58-49b3-b3fa-35196c7e214a")
+		(property "Reference" "R31"
+			(at 82.55 118.11 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at 82.55 120.65 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
+			(at 82.55 122.682 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 82.55 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 82.55 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "b9e0434c-1f9a-4d0b-811a-5b01da1638e4")
+		)
+		(pin "1"
+			(uuid "dd659cfe-3ba2-49e0-90e8-bef2e17024f1")
+		)
+		(instances
+			(project "MyScale"
+				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
+					(reference "R31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at -48.26 194.31 0)
 		(unit 1)
@@ -10820,86 +11050,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 245.11 21.59 90)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "e48f0496-359f-415d-b054-04f7a7d2242d")
-		(property "Reference" "R15"
-			(at 245.11 15.24 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "0R"
-			(at 245.11 17.78 90)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
-			(at 245.11 23.368 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 245.11 21.59 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 245.11 21.59 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "ddd41db8-9569-4e58-884c-ae4f3023d7bc")
-		)
-		(pin "2"
-			(uuid "8e0d5518-2d80-4402-a4b8-7a84291d740a")
-		)
-		(instances
-			(project "MyScale"
-				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
-					(reference "R15")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 226.06 86.36 90)
 		(unit 1)
 		(body_style 1)
@@ -10972,6 +11122,83 @@
 			(project "MyScale"
 				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
 					(reference "R14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 78.74 147.32 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e90b5444-0afd-425e-b542-406e8b870245")
+		(property "Reference" "TP2"
+			(at 75.438 142.24 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 75.438 144.78 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
+			(at 78.74 142.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 78.74 142.24 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "test point"
+			(at 78.74 147.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "3109f5ee-d62c-4b48-8ff4-577e69043b05")
+		)
+		(instances
+			(project "MyScale"
+				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
+					(reference "TP2")
 					(unit 1)
 				)
 			)
