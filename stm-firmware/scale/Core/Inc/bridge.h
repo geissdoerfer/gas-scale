@@ -15,6 +15,7 @@ extern "C" {
 #include "main.h"
 
 void UART_Bridge_Init(void);
+void UART_Bridge_Process(void);
 
 #ifdef __cplusplus
 }

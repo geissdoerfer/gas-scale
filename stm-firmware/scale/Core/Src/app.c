@@ -4,7 +4,9 @@
 #include "main.h"
 #include "stm32u0xx_hal.h"
 #include "usart.h"
+#include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
 
 void SystemClock_Config(void);
 
@@ -14,6 +16,19 @@ int __io_putchar(int ch) {
   return ch;
 }
 
+int send2module(const char *format, ...) {
+  char buffer[256];
+  va_list args;
+  va_start(args, format);
+  int len = vsnprintf(buffer, sizeof(buffer), format, args);
+  va_end(args);
+
+  if (len > 0) {
+    HAL_UART_Transmit(&huart3, (uint8_t *)buffer, len, HAL_MAX_DELAY);
+  }
+
+  return len;
+}
 /**
  * @brief  The application entry point.
  * @retval int
@@ -45,15 +60,32 @@ int main(void) {
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
+  HAL_Delay(10000);
+
+  send2module("AT\r\n");
+  HAL_Delay(2000);
+
+  send2module("AT\r\n");
+  HAL_Delay(2000);
+  send2module("AT+CPIN=6436\r\n");
+  HAL_Delay(10000);
+  send2module("AT+CPSI?\r\n");
 
   unsigned int counter = 0;
+  uint32_t last_led_toggle = 0;
   while (1) {
     /* USER CODE END WHILE */
-    HAL_Delay(500);
-    HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
-    // printf("Hello %u\r\n", counter++);
+
+    // Process UART bridge continuously (high priority)
+    UART_Bridge_Process();
+
+    // Toggle LED every 500ms without blocking
+    if (HAL_GetTick() - last_led_toggle >= 500) {
+      HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
+      last_led_toggle = HAL_GetTick();
+      // printf("Hello %u\r\n", counter++);
+    }
     /* USER CODE BEGIN 3 */
-    // UART bridge runs in interrupts - main loop can be empty or do other tasks
   }
   /* USER CODE END 3 */
 }
