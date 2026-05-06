@@ -1,4 +1,5 @@
 #include "adc.h"
+#include "bridge.h"
 #include "gpio.h"
 #include "main.h"
 #include "stm32u0xx_hal.h"
@@ -36,19 +37,23 @@ int main(void) {
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
 
-  HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
+  // Initialize UART bridge
+  UART_Bridge_Init();
 
-  // HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
+  HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
+  HAL_Delay(100);
+  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
+
+  unsigned int counter = 0;
   while (1) {
     /* USER CODE END WHILE */
-
+    HAL_Delay(500);
+    HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
+    // printf("Hello %u\r\n", counter++);
     /* USER CODE BEGIN 3 */
-    // Toggle LED every 500ms (1s period)
-    HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
-    HAL_Delay(1000);
-    HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
-    HAL_Delay(1000);
-    printf("Hello there!\r\n");
+    // UART bridge runs in interrupts - main loop can be empty or do other tasks
   }
   /* USER CODE END 3 */
 }

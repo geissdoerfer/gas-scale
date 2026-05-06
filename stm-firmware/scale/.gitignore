@@ -1,7 +1,6 @@
 .mxproject
 CMakeLists.txt
 CMakePresets.json
-Core/Inc/
 Core/Src/adc.c
 Core/Src/gpio.c
 Core/Src/main.c
@@ -11,6 +10,11 @@ Core/Src/syscalls.c
 Core/Src/sysmem.c
 Core/Src/system_stm32u0xx.c
 Core/Src/usart.c
+Core/Inc/adc.h
+Core/Inc/gpio.h
+Core/Inc/main.h
+Core/Inc/stm32u0xx_hal_conf.h
+Core/Inc/stm32u0xx_it.h
 Drivers/
 *.ld
 cmake/
