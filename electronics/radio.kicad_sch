@@ -5224,6 +5224,16 @@
 	)
 	(wire
 		(pts
+			(xy -46.99 138.43) (xy -40.64 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0ace55b8-13c4-4f6e-83ac-e6d433ee22d3")
+	)
+	(wire
+		(pts
 			(xy 227.33 96.52) (xy 227.33 99.06)
 		)
 		(stroke
@@ -5511,6 +5521,16 @@
 			(type default)
 		)
 		(uuid "51556176-87f6-4ab4-a578-6de9a939e55f")
+	)
+	(wire
+		(pts
+			(xy -33.02 138.43) (xy -13.97 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "53d09796-3e30-4136-84c1-9924199bbaec")
 	)
 	(wire
 		(pts
@@ -6024,6 +6044,16 @@
 	)
 	(wire
 		(pts
+			(xy -46.99 133.35) (xy -46.99 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c3c4ac47-2e65-4b9c-9af1-a1e48b05d8a2")
+	)
+	(wire
+		(pts
 			(xy 275.59 21.59) (xy 270.51 21.59)
 		)
 		(stroke
@@ -6481,6 +6511,16 @@
 			(justify right bottom)
 		)
 		(uuid "b9f7e7cc-cf84-460b-abc3-b94382330ee2")
+	)
+	(label "VbatModule"
+		(at -13.97 138.43 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "d733f857-bcd8-4b98-97af-e1b2d5cc8171")
 	)
 	(label "SimDet"
 		(at 233.68 101.6 0)
@@ -7626,7 +7666,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 9.652 106.68 90)
 			(hide yes)
 			(show_name no)
@@ -7865,7 +7905,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at 23.622 30.48 90)
 			(hide yes)
 			(show_name no)
@@ -8018,7 +8058,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "33p"
+		(property "Value" "22p"
 			(at 46.99 69.8499 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8150,6 +8190,84 @@
 			(project "MyScale"
 				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
 					(reference "#PWR081")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "MyScale:VBAT")
+		(at -46.99 133.35 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7bfa1a29-8bdb-4d07-9198-389d53959108")
+		(property "Reference" "#PWR0100"
+			(at -46.99 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "VBAT"
+			(at -46.99 128.27 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -46.99 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at -46.99 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"VBAT\""
+			(at -46.99 133.35 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "29faa733-a59e-448d-8844-a31176b3ea3f")
+		)
+		(instances
+			(project "MyScale"
+				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
+					(reference "#PWR0100")
 					(unit 1)
 				)
 			)
@@ -8728,7 +8846,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "20k"
+		(property "Value" "10k"
 			(at -70.612 189.23 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8739,7 +8857,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric"
 			(at -66.548 187.96 90)
 			(hide yes)
 			(show_name no)
@@ -8968,7 +9086,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "10p"
+		(property "Value" "6.8p"
 			(at 58.42 69.8499 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10400,7 +10518,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "51R"
+		(property "Value" "22R"
 			(at 180.34 143.5099 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10492,7 +10610,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at -47.2948 193.04 0)
 			(hide yes)
 			(show_name no)
@@ -10573,7 +10691,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at -51.1048 171.45 0)
 			(hide yes)
 			(show_name no)
@@ -10616,6 +10734,86 @@
 			(project "MyScale"
 				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
 					(reference "C27")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at -36.83 138.43 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(in_pos_files no)
+		(dnp yes)
+		(fields_autoplaced yes)
+		(uuid "d5be842e-9f6a-4b30-9506-e5a4542aa1d9")
+		(property "Reference" "R15"
+			(at -36.83 132.08 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "0R"
+			(at -36.83 134.62 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
+			(at -36.83 140.208 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at -36.83 138.43 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Resistor"
+			(at -36.83 138.43 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f3f4aab5-7b53-4132-9636-9c9cd2ba6e88")
+		)
+		(pin "2"
+			(uuid "1ee95ca9-c47a-4787-bf32-b2070b698099")
+		)
+		(instances
+			(project "MyScale"
+				(path "/b5eed584-7820-40e8-871b-2aa5dd8c83ec/d79f2b7f-8f6c-4118-9551-ed509f2ef890"
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -10966,7 +11164,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at -10.4648 186.69 0)
 			(hide yes)
 			(show_name no)
@@ -11281,7 +11479,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at -37.1348 163.83 0)
 			(hide yes)
 			(show_name no)

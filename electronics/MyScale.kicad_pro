@@ -570,7 +570,7 @@
       "method": 0,
       "sort_order": 0
     },
-    "bom_export_filename": "${PROJECTNAME}.csv",
+    "bom_export_filename": "gerber/bom.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
       "field_delimiter": ",",
@@ -687,7 +687,7 @@
       "include_excluded_from_bom": false,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Reference"
+      "sort_field": "Value"
     },
     "bus_aliases": {},
     "connection_grid_size": 50.0,
@@ -738,7 +738,7 @@
         "uuid": "b5eed584-7820-40e8-871b-2aa5dd8c83ec"
       }
     ],
-    "used_designators": "TP2-4,R30-31,Q2",
+    "used_designators": "H4,#PWR33",
     "variants": []
   },
   "sheets": [
