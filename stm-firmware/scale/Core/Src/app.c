@@ -82,11 +82,11 @@ int main(void) {
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
 
   // Wait for module to be ready
-  printf("Waiting for ATREADY...\r\n");
-  if (AT_WaitForResponse(30000, "ATREADY")) {
+  printf("Waiting for *ATREADY...\r\n");
+  if (AT_WaitForResponse(20000, "*ATREADY")) {
     printf("Module is ready!\r\n");
   } else {
-    printf("Timeout waiting for ATREADY\r\n");
+    printf("Timeout waiting for *ATREADY\r\n");
   }
 
 #if 0
@@ -100,7 +100,6 @@ int main(void) {
   HAL_Delay(1000);
 
   AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
-  AT_SendCommand("AT+CCERTLIST\r\n", NULL, 2000);
 
   // Wait for LTE service
   printf("Waiting for LTE service...\r\n");
@@ -137,16 +136,21 @@ int main(void) {
     if (HAL_GetTick() - last_led_toggle >= 5000) {
       HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
+
+      // Format the weight value into a JSON string
+      char message[128];
+      snprintf(message, sizeof(message), "{\"weight\":%d}", value);
+
       MQTT_Connect();
       HAL_Delay(500);
 
-      MQTT_Publish("sensors/weight", "{\"weight\":23445}");
+      MQTT_Publish("sensors/weight", message);
       HAL_Delay(500);
 
       MQTT_Disconnect();
       last_led_toggle = HAL_GetTick();
 
-      //  printf("Hello %u: %d\r\n", counter++, value);
+      printf("Published weight: %d\r\n", value);
     }
     /* USER CODE BEGIN 3 */
   }
