@@ -5,6 +5,7 @@
 #include "gpio.h"
 #include "hx711.h"
 #include "main.h"
+#include "mqtt.h"
 #include "stm32u0xx_hal.h"
 #include "usart.h"
 #include <stdarg.h>
@@ -71,6 +72,7 @@ int main(void) {
 
   printf("Oh hello there!\r\n");
   // Initialize HX711
+  HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_SET);
   HX711_Init();
 
   HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
@@ -78,10 +80,15 @@ int main(void) {
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
   HAL_Delay(100);
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
-  HAL_Delay(10000);
 
-  send2module("AT\r\n");
-  HAL_Delay(2000);
+  // Wait for module to be ready
+  printf("Waiting for ATREADY...\r\n");
+  if (AT_WaitForResponse(30000, "ATREADY")) {
+    printf("Module is ready!\r\n");
+  } else {
+    printf("Timeout waiting for ATREADY\r\n");
+  }
+
 #if 0
   if (CertUpload_UploadISRGRootX1()) {
     printf("Certificate uploaded successfully!\r\n");
@@ -89,13 +96,11 @@ int main(void) {
     printf("Certificate upload failed!\r\n");
   }
 #endif
-  send2module("AT\r\n");
-  HAL_Delay(2000);
-  // send2module("AT+CPIN=6436\r\n");
-  send2module("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n");
-  HAL_Delay(10000);
+  AT_SendCommand("AT\r\n", "OK", 2000);
+  HAL_Delay(1000);
 
-  HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_SET);
+  AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
+  AT_SendCommand("AT+CCERTLIST\r\n", NULL, 2000);
 
   // Wait for LTE service
   printf("Waiting for LTE service...\r\n");
@@ -103,8 +108,22 @@ int main(void) {
     printf("No service yet, retrying...\r\n");
     HAL_Delay(5000);
   }
-  printf("LTE service acquired!\r\n");
   printf("Service info: %s\r\n", AT_GetLastResponse());
+
+  MQTT_Config_t config = {
+      .broker_url =
+          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
+      .client_id = "ClientID",
+      .username = "nessie",
+      .password = "D-sub729",
+      .keepalive = 60,
+      .ca_cert = "isrgrootx1.pem"};
+
+  AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
+  HAL_Delay(2000);
+  send2module("AT+CCLK?\r\n");
+
+  MQTT_Init(&config);
 
   unsigned int counter = 0;
   uint32_t last_led_toggle = 0;
@@ -115,12 +134,18 @@ int main(void) {
     UART_Bridge_Process();
 
     // Toggle LED every 500ms without blocking
-    if (HAL_GetTick() - last_led_toggle >= 1000) {
+    if (HAL_GetTick() - last_led_toggle >= 5000) {
       HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
-      last_led_toggle = HAL_GetTick();
-      send2module("AT+CPSI?\r\n");
+      int value = HX711_ReadAverage(HX711_GAIN_64, 32);
+      MQTT_Connect();
+      HAL_Delay(500);
 
-      // int value = HX711_ReadAverage(HX711_GAIN_64, 32);
+      MQTT_Publish("sensors/weight", "{\"weight\":23445}");
+      HAL_Delay(500);
+
+      MQTT_Disconnect();
+      last_led_toggle = HAL_GetTick();
+
       //  printf("Hello %u: %d\r\n", counter++, value);
     }
     /* USER CODE BEGIN 3 */

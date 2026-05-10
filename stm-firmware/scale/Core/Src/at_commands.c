@@ -11,6 +11,8 @@
 #include "stm32u0xx_hal.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 // Response buffer
 static char response_buffer[AT_RESPONSE_BUFFER_SIZE];
@@ -18,7 +20,7 @@ static char response_buffer[AT_RESPONSE_BUFFER_SIZE];
 /**
  * @brief Wait for response from module with timeout
  */
-static bool wait_for_response(uint32_t timeout_ms, const char *expected) {
+bool AT_WaitForResponse(uint32_t timeout_ms, const char *expected) {
   uint32_t start = HAL_GetTick();
   uint16_t idx = 0;
 
@@ -51,7 +53,7 @@ bool AT_SendCommand(const char *cmd, const char *expected_response, uint32_t tim
   HAL_UART_Transmit(&huart3, (uint8_t*)cmd, strlen(cmd), 1000);
 
   // Wait for response (reads from bridge buffer and forwards to UART1)
-  return wait_for_response(timeout_ms, expected_response);
+  return AT_WaitForResponse(timeout_ms, expected_response);
 }
 
 /**
@@ -66,4 +68,15 @@ const char* AT_GetLastResponse(void) {
  */
 void AT_ClearResponse(void) {
   memset(response_buffer, 0, AT_RESPONSE_BUFFER_SIZE);
+}
+
+/**
+ * @brief Send raw data (not an AT command)
+ */
+bool AT_SendData(const uint8_t *data, uint16_t length, const char *expected_response, uint32_t timeout_ms) {
+  // Send raw data
+  HAL_UART_Transmit(&huart3, (uint8_t*)data, length, 5000);
+
+  // Wait for response (reads from bridge buffer and forwards to UART1)
+  return AT_WaitForResponse(timeout_ms, expected_response);
 }
