@@ -9,14 +9,17 @@
 #include "bridge.h"
 #include "usart.h"
 #include "stm32u0xx_hal.h"
+#include <stdbool.h>
 #include <stdint.h>
 
 // Buffers for UART bridge
 #define BRIDGE_BUFFER_SIZE 512
 static uint8_t uart3_rx_buffer;
 static uint8_t bridge_buffer[BRIDGE_BUFFER_SIZE];
+static uint8_t tx_buffer[BRIDGE_BUFFER_SIZE];
 static volatile uint16_t bridge_head = 0;
 static volatile uint16_t bridge_tail = 0;
+static volatile uint16_t tx_count = 0;
 static volatile uint8_t tx_busy = 0;
 
 /**
@@ -34,10 +37,18 @@ void UART_Bridge_Init(void) {
 void UART_Bridge_Process(void) {
   // Check if there's data to send and UART1 is ready
   if (bridge_head != bridge_tail && !tx_busy) {
-    tx_busy = 1;
-    uint8_t data = bridge_buffer[bridge_tail];
-    bridge_tail = (bridge_tail + 1) % BRIDGE_BUFFER_SIZE;
-    HAL_UART_Transmit_IT(&huart1, &data, 1);
+    // Copy data from circular buffer to linear TX buffer
+    tx_count = 0;
+    while (bridge_tail != bridge_head && tx_count < BRIDGE_BUFFER_SIZE) {
+      tx_buffer[tx_count++] = bridge_buffer[bridge_tail];
+      bridge_tail = (bridge_tail + 1) % BRIDGE_BUFFER_SIZE;
+    }
+
+    // Start transmission
+    if (tx_count > 0) {
+      tx_busy = 1;
+      HAL_UART_Transmit_IT(&huart1, tx_buffer, tx_count);
+    }
   }
 }
 
@@ -47,6 +58,7 @@ void UART_Bridge_Process(void) {
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart->Instance == USART1) {
     tx_busy = 0;
+    tx_count = 0;
   }
 }
 
@@ -69,4 +81,26 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
     HAL_UART_Receive_IT(&huart3, &uart3_rx_buffer, 1);
   }
   // UART1->UART3 forwarding disabled (handled manually via send2module)
+}
+
+/**
+ * @brief Read byte from bridge buffer and forward to UART1
+ */
+bool UART_Bridge_ReadByte(uint8_t *byte, uint32_t timeout_ms) {
+  uint32_t start = HAL_GetTick();
+
+  while ((HAL_GetTick() - start) < timeout_ms) {
+    // Check if data available in bridge buffer
+    if (bridge_head != bridge_tail) {
+      *byte = bridge_buffer[bridge_tail];
+      bridge_tail = (bridge_tail + 1) % BRIDGE_BUFFER_SIZE;
+
+      // Forward to UART1 immediately
+      HAL_UART_Transmit(&huart1, byte, 1, 10);
+
+      return true;
+    }
+  }
+
+  return false;
 }
