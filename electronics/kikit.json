@@ -1,12 +1,9 @@
 {
     "layout": {
         "type": "grid",
-        "rows": 1,
-        "cols": 1,
-        "hspace": "2mm",
-        "vspace": "2mm",
-        "rotation": "180deg",
-        "alternation": "cols",
+        "rows": 2,
+        "cols": 2,
+        "space": "2mm",
         "renamenet": "Board_{n}-{orig}",
         "renameref": "{orig}"
     },
@@ -15,12 +12,14 @@
         "tolerance": "50mm"
     },
     "tabs": {
-        "type": "annotation",
-        "tabfootprints": "MyScale:KikitTab"
+        "type": "fixed",
+        "hwidth": "45mm",
+        "vwidth": "65mm"
     },
     "cuts": {
-        "type": "mousebites",
-        "offset": "-0.25mm"
+        "type": "vcuts",
+        "offset": "-0.2mm",
+        "clearance": "0.8mm"
     },
     "framing": {
         "type": "frame",
@@ -41,12 +40,17 @@
     },
     "fiducials": {
         "type": "3fid",
-        "hoffset": "4mm",
+        "hoffset": "8mm",
         "voffset": "4mm",
         "coppersize": "2mm",
-        "opening": "2.5mm"
+        "opening": "2.5mm",
+        "paste": true
     },
     "tooling": {
-        "type": "none",
+        "type": "4hole",
+        "hoffset": "4mm",
+        "voffset": "4mm",
+        "size": "2.5mm",
+        "paste": true
     }
 }
