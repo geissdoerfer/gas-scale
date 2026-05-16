@@ -3,7 +3,7 @@
         "type": "grid",
         "rows": 2,
         "cols": 2,
-        "space": "2mm",
+        "space": "2.4mm",
         "renamenet": "Board_{n}-{orig}",
         "renameref": "{orig}"
     },
