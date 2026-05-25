@@ -133,7 +133,7 @@ int main(void) {
     UART_Bridge_Process();
 
     // Toggle LED every 500ms without blocking
-    if (HAL_GetTick() - last_led_toggle >= 5000) {
+    if (HAL_GetTick() - last_led_toggle >= 60000) {
       HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
 
@@ -143,8 +143,12 @@ int main(void) {
 
       MQTT_Connect();
       HAL_Delay(500);
+      // Publish raw value via MQTT
+      snprintf(message, sizeof(message),
+               "{\"value\":%d,\"temperature\":%.3f,\"battery_voltage\":%.3f}",
+               value, 23.5, 3.9);
 
-      MQTT_Publish("sensors/weight", message);
+      MQTT_Publish("sensors/a46fb35d/data", message);
       HAL_Delay(500);
 
       MQTT_Disconnect();

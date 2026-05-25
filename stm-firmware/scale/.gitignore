@@ -1,5 +1,4 @@
 .mxproject
-CMakeLists.txt
 CMakePresets.json
 Core/Src/adc.c
 Core/Src/gpio.c
