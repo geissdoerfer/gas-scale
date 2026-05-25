@@ -15,6 +15,8 @@ class Config:
     MQTT_KEEPALIVE = int(os.getenv('MQTT_KEEPALIVE', 60))
     MQTT_USERNAME = os.getenv('MQTT_USERNAME')
     MQTT_PASSWORD = os.getenv('MQTT_PASSWORD')
+    MQTT_USE_TLS = os.getenv('MQTT_USE_TLS', 'false').lower() == 'true'
+    MQTT_CA_CERT = os.getenv('MQTT_CA_CERT')
 
     # Database Configuration
     POSTGRES_HOST = os.getenv('POSTGRES_HOST', 'postgres')

@@ -25,8 +25,8 @@ CREATE TABLE devices (
     device_id VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(100),
     description TEXT,
-    "offset" FLOAT DEFAULT -274753.0 NOT NULL,
-    gain FLOAT DEFAULT 0.0797197 NOT NULL,
+    "offset" FLOAT DEFAULT -256620.0 NOT NULL,
+    gain FLOAT DEFAULT -0.09121 NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

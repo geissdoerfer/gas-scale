@@ -3,6 +3,8 @@ MQTT client for receiving and processing sensor messages.
 """
 import json
 import logging
+import os
+import ssl
 from datetime import datetime
 import paho.mqtt.client as mqtt
 from config import Config
@@ -31,6 +33,37 @@ class MQTTIngestor:
         if Config.MQTT_USERNAME and Config.MQTT_PASSWORD:
             self.client.username_pw_set(Config.MQTT_USERNAME, Config.MQTT_PASSWORD)
             logger.info("MQTT authentication configured")
+
+        # Configure TLS if enabled
+        if Config.MQTT_USE_TLS:
+            self._configure_tls()
+            logger.info("MQTT TLS/SSL configured")
+
+    def _configure_tls(self):
+        """Configure TLS/SSL for secure MQTT connection"""
+        try:
+            # Check if CA certificate file exists
+            if Config.MQTT_CA_CERT and os.path.isfile(Config.MQTT_CA_CERT):
+                # Use provided CA certificate
+                self.client.tls_set(
+                    ca_certs=Config.MQTT_CA_CERT,
+                    cert_reqs=ssl.CERT_REQUIRED,
+                    tls_version=ssl.PROTOCOL_TLS
+                )
+                logger.info(f"TLS configured with CA certificate: {Config.MQTT_CA_CERT}")
+            else:
+                # Use insecure TLS without certificate verification
+                if Config.MQTT_CA_CERT:
+                    logger.warning(f"CA certificate not found: {Config.MQTT_CA_CERT}")
+                self.client.tls_set(
+                    cert_reqs=ssl.CERT_NONE,
+                    tls_version=ssl.PROTOCOL_TLS
+                )
+                self.client.tls_insecure_set(True)
+                logger.warning("TLS configured without certificate verification (insecure)")
+        except Exception as e:
+            logger.error(f"Failed to configure TLS: {e}")
+            raise
 
     def connect(self):
         """Connect to MQTT broker"""
