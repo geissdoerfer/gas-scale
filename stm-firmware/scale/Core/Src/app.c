@@ -15,6 +15,35 @@
 
 void SystemClock_Config(void);
 
+/**
+ * @brief Configure and enter STOP2 low power mode
+ * @note The MCU will wake up from RTC wakeup timer interrupt
+ * @retval None
+ */
+static void Enter_STOP2_Mode(void) {
+  printf("Entering STOP2 mode...\r\n");
+  HAL_Delay(100); // Allow printf to complete transmission
+
+  // Suspend SysTick interrupt to prevent wakeup
+  HAL_SuspendTick();
+
+  // Enter STOP2 mode
+  // - Regulator in low-power mode
+  // - Wake up on RTC wakeup timer interrupt (EXTI line 20)
+  HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
+
+  // --- MCU wakes up here when RTC interrupt fires ---
+
+  // System clock is now running on MSI (4 MHz default after wakeup)
+  // Need to reconfigure to HSI (16 MHz)
+  SystemClock_Config();
+
+  // Resume SysTick
+  HAL_ResumeTick();
+
+  printf("Woke up from STOP2 mode\r\n");
+}
+
 // Redirect printf to UART1 by implementing __io_putchar
 int __io_putchar(int ch) {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
@@ -126,19 +155,21 @@ int main(void) {
 
   MQTT_Init(&config);
 
-  printf("RTC-based sensor reading initialized. Waiting for wakeup events...\r\n");
+  printf(
+      "RTC-based sensor reading initialized. Waiting for wakeup events...\r\n");
+
+  // Enter STOP2 mode immediately - RTC will wake us up
+  Enter_STOP2_Mode();
 
   while (1) {
     /* USER CODE END WHILE */
 
-    // Process UART bridge continuously (high priority)
-    UART_Bridge_Process();
-
     // Check if RTC wakeup event occurred (every 60 seconds)
     if (rtc_wakeup_flag) {
-      rtc_wakeup_flag = 0;  // Clear the flag
+      rtc_wakeup_flag = 0; // Clear the flag
 
       printf("RTC wakeup: Starting sensor read and MQTT publish\r\n");
+      HX711_PowerUp();
 
       // Wake up the cellular module
       printf("Trying to wakeup module\r\n");
@@ -179,6 +210,10 @@ int main(void) {
 
       // Turn off LED
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
+      HX711_PowerDown();
+
+      // Enter STOP2 mode until next RTC wakeup
+      Enter_STOP2_Mode();
     }
     /* USER CODE BEGIN 3 */
   }
