@@ -6,6 +6,7 @@
 #include "hx711.h"
 #include "main.h"
 #include "mqtt.h"
+#include "rtc.h"
 #include "stm32u0xx_hal.h"
 #include "usart.h"
 #include <stdarg.h>
@@ -66,6 +67,7 @@ int main(void) {
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
+  MX_RTC_Init();
 
   // Initialize UART bridge
   UART_Bridge_Init();
@@ -124,16 +126,21 @@ int main(void) {
 
   MQTT_Init(&config);
 
-  unsigned int counter = 0;
-  uint32_t last_led_toggle = 0;
+  printf("RTC-based sensor reading initialized. Waiting for wakeup events...\r\n");
+
   while (1) {
     /* USER CODE END WHILE */
 
     // Process UART bridge continuously (high priority)
     UART_Bridge_Process();
 
-    // Toggle LED every 500ms without blocking
-    if (HAL_GetTick() - last_led_toggle >= 60000) {
+    // Check if RTC wakeup event occurred (every 60 seconds)
+    if (rtc_wakeup_flag) {
+      rtc_wakeup_flag = 0;  // Clear the flag
+
+      printf("RTC wakeup: Starting sensor read and MQTT publish\r\n");
+
+      // Wake up the cellular module
       printf("Trying to wakeup module\r\n");
       for (unsigned int i = 0; i < 3; i++) {
         if (AT_SendCommand("AT\r\n", "OK", 2000))
@@ -141,28 +148,36 @@ int main(void) {
         else
           printf("Didn't receive OK from module\r\n");
       }
+
+      // Turn on LED during sensor read and transmission
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
+
+      // Read sensor value
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
 
-      // Format the weight value into a JSON string
+      // Format the sensor data into a JSON message
       char message[128];
-      snprintf(message, sizeof(message), "{\"weight\":%d}", value);
-
-      MQTT_Connect();
-      HAL_Delay(500);
-      // Publish raw value via MQTT
       snprintf(message, sizeof(message),
                "{\"value\":%d,\"temperature\":%.3f,\"battery_voltage\":%.3f}",
                value, 23.5, 3.9);
 
+      // Connect to MQTT broker
+      MQTT_Connect();
+      HAL_Delay(500);
+
+      // Publish sensor data
       MQTT_Publish("sensors/a46fb35d/data", message);
       HAL_Delay(500);
 
+      // Disconnect from MQTT
       MQTT_Disconnect();
-      last_led_toggle = HAL_GetTick();
 
       printf("Published weight: %d\r\n", value);
+
+      // Put cellular module to sleep
       AT_SendCommand("AT+CSCLK=2\r\n", "OK", 2000);
+
+      // Turn off LED
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
     }
     /* USER CODE BEGIN 3 */
