@@ -1,5 +1,6 @@
 .mxproject
 CMakePresets.json
+Core/Src/rtc.c
 Core/Src/adc.c
 Core/Src/gpio.c
 Core/Src/main.c
@@ -9,6 +10,7 @@ Core/Src/syscalls.c
 Core/Src/sysmem.c
 Core/Src/system_stm32u0xx.c
 Core/Src/usart.c
+Core/Inc/rtc.h
 Core/Inc/adc.h
 Core/Inc/gpio.h
 Core/Inc/main.h
