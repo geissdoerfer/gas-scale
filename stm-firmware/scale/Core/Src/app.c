@@ -134,7 +134,14 @@ int main(void) {
 
     // Toggle LED every 500ms without blocking
     if (HAL_GetTick() - last_led_toggle >= 60000) {
-      HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
+      printf("Trying to wakeup module\r\n");
+      for (unsigned int i = 0; i < 3; i++) {
+        if (AT_SendCommand("AT\r\n", "OK", 2000))
+          break;
+        else
+          printf("Didn't receive OK from module\r\n");
+      }
+      HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
 
       // Format the weight value into a JSON string
@@ -155,6 +162,8 @@ int main(void) {
       last_led_toggle = HAL_GetTick();
 
       printf("Published weight: %d\r\n", value);
+      AT_SendCommand("AT+CSCLK=2\r\n", "OK", 2000);
+      HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
     }
     /* USER CODE BEGIN 3 */
   }
