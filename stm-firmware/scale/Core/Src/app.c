@@ -16,6 +16,44 @@
 void SystemClock_Config(void);
 
 /**
+ * @brief Read battery voltage using ADC
+ * @note Enables battery sense circuit, reads ADC, then disables circuit
+ * @retval Battery voltage in volts, or 0.0 if read failed
+ */
+static float Read_Battery_Voltage(void) {
+  float battery_voltage = 0.0f;
+
+  // Enable battery sense circuit
+  HAL_GPIO_WritePin(BatSenseEnable_GPIO_Port, BatSenseEnable_Pin, GPIO_PIN_SET);
+  HAL_Delay(25); // Allow circuit to settle
+
+  // Perform ADC conversion on PA0 (ADC_CHANNEL_4)
+  HAL_ADC_Start(&hadc1);
+  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
+    uint32_t adc_raw = HAL_ADC_GetValue(&hadc1);
+
+    // Convert ADC value to actual battery voltage
+    // ADC is 12-bit (0-4095), Vref = 1.8V (VDDA)
+    // Voltage divider: 20k upper, 10k lower -> Vbat = Vadc * (20k+10k)/10k
+    // = Vadc * 3
+    float vadc = (adc_raw / 4095.0f) * 1.8f;
+    battery_voltage = vadc * 3.0f; // Apply voltage divider scaling
+
+    printf("Battery ADC: %lu, Voltage: %.3fV\r\n", adc_raw, battery_voltage);
+  } else {
+    printf("Battery voltage ADC read failed\r\n");
+  }
+
+  // Disable battery sense circuit
+  HAL_GPIO_WritePin(BatSenseEnable_GPIO_Port, BatSenseEnable_Pin,
+                    GPIO_PIN_RESET);
+
+  HAL_ADC_Stop(&hadc1);
+
+  return battery_voltage;
+}
+
+/**
  * @brief Configure and enter STOP2 low power mode
  * @note The MCU will wake up from RTC wakeup timer interrupt
  * @retval None
@@ -169,6 +207,10 @@ int main(void) {
       rtc_wakeup_flag = 0; // Clear the flag
 
       printf("RTC wakeup: Starting sensor read and MQTT publish\r\n");
+
+      // Read battery voltage first thing after wakeup
+      float battery_voltage = Read_Battery_Voltage();
+
       HX711_PowerUp();
 
       // Wake up the cellular module
@@ -185,37 +227,6 @@ int main(void) {
 
       // Read sensor value
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
-
-      // Read battery voltage
-      float battery_voltage = 0.0f;
-
-      // Enable battery sense circuit
-      HAL_GPIO_WritePin(BatSenseEnable_GPIO_Port, BatSenseEnable_Pin,
-                        GPIO_PIN_SET);
-      HAL_Delay(10); // Allow circuit to settle
-
-      // Perform ADC conversion on PA0 (ADC_CHANNEL_4)
-      HAL_ADC_Start(&hadc1);
-      if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
-        uint32_t adc_raw = HAL_ADC_GetValue(&hadc1);
-
-        // Convert ADC value to actual battery voltage
-        // ADC is 12-bit (0-4095), Vref = 1.8V (VDDA)
-        // Voltage divider: 20k upper, 10k lower -> Vbat = Vadc * (20k+10k)/10k
-        // = Vadc * 3
-        float vadc = (adc_raw / 4095.0f) * 1.8f;
-        battery_voltage = vadc * 3.0f; // Apply voltage divider scaling
-
-        printf("Battery ADC: %lu, Voltage: %.3fV\r\n", adc_raw,
-               battery_voltage);
-      } else {
-        printf("Battery voltage ADC read failed\r\n");
-      }
-
-      // Disable battery sense circuit
-      HAL_GPIO_WritePin(BatSenseEnable_GPIO_Port, BatSenseEnable_Pin,
-                        GPIO_PIN_RESET);
-      HAL_ADC_Stop(&hadc1);
 
       // Format the sensor data into a JSON message
       char message[128];
