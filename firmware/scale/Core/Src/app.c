@@ -100,6 +100,9 @@ int __io_putchar(int ch) {
   return ch;
 }
 
+// Radio initialization counter
+static uint32_t radio_init_count = 0;
+
 // Check if module has LTE service
 static bool has_lte_service(void) {
   if (AT_SendCommand("AT+CPSI?\r\n", "OK", 2000)) {
@@ -117,7 +120,8 @@ static bool has_lte_service(void) {
  * @retval true if initialization successful, false otherwise
  */
 static bool RadioInit(void) {
-  printf("Initializing radio module...\r\n");
+  radio_init_count++;
+  printf("Initializing radio module (count: %lu)...\r\n", radio_init_count);
 
   // Clear any old data from the bridge buffer before starting
   UART_Bridge_ClearBuffer();
@@ -251,8 +255,8 @@ int main(void) {
       // Format the sensor data into a JSON message
       char message[128];
       snprintf(message, sizeof(message),
-               "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f}", value, 23.5,
-               battery_voltage);
+               "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}", value, 23.5,
+               battery_voltage, radio_init_count);
 
       if (MQTT_Connect()) {
         HAL_Delay(500);
