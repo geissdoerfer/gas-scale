@@ -143,8 +143,6 @@ bool MQTT_Publish(const char *topic, const char *message) {
     return false;
   }
 
-  uint16_t msg_len = strlen(message);
-
   snprintf(cmd, sizeof(cmd), "AT+CMQTTPUB=0,\"%s\",0,%u,0\r\n", topic,
            strlen(message));
 

@@ -15,6 +15,18 @@
 
 void SystemClock_Config(void);
 
+// Volatile flag to signal main loop that RTC wakeup occurred
+volatile uint8_t rtc_wakeup_flag = 0;
+
+/**
+ * @brief RTC Wakeup Timer Event Callback
+ * @param hrtc RTC handle pointer
+ * @retval None
+ */
+void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc) {
+  rtc_wakeup_flag = 1;
+}
+
 /**
  * @brief Read battery voltage using ADC
  * @note Enables battery sense circuit, reads ADC, then disables circuit
@@ -99,33 +111,85 @@ static bool has_lte_service(void) {
   return false;
 }
 
-int send2module(const char *format, ...) {
-  char buffer[256];
-  va_list args;
-  va_start(args, format);
-  int len = vsnprintf(buffer, sizeof(buffer), format, args);
-  va_end(args);
+/**
+ * @brief Initialize the cellular radio module
+ * @note Powers on the module, waits for LTE service, and initializes MQTT
+ * @retval true if initialization successful, false otherwise
+ */
+static bool RadioInit(void) {
+  printf("Initializing radio module...\r\n");
 
-  if (len > 0) {
-    HAL_UART_Transmit(&huart3, (uint8_t *)buffer, len, HAL_MAX_DELAY);
+  // Clear any old data from the bridge buffer before starting
+  UART_Bridge_ClearBuffer();
+  AT_ClearResponse();
+
+  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
+  HAL_Delay(100);
+  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
+
+  // Wait for module to be ready
+  printf("Waiting for *ATREADY...\r\n");
+  if (AT_WaitForResponse(20000, "*ATREADY")) {
+    printf("Module is ready!\r\n");
+  } else {
+    printf("Timeout waiting for *ATREADY\r\n");
+    return false;
   }
 
-  return len;
+#if 0
+  if (CertUpload_UploadISRGRootX1()) {
+    printf("Certificate uploaded successfully!\r\n");
+  } else {
+    printf("Certificate upload failed!\r\n");
+  }
+#endif
+  AT_SendCommand("AT\r\n", "OK", 2000);
+  HAL_Delay(1000);
+
+  AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
+
+  // Wait for LTE service
+  printf("Waiting for LTE service...\r\n");
+  int retry_count = 0;
+  while (!has_lte_service()) {
+    printf("No service yet, retrying...\r\n");
+    HAL_Delay(5000);
+    retry_count++;
+    if (retry_count > 20) { // Timeout after ~100 seconds
+      printf("Failed to get LTE service\r\n");
+      return false;
+    }
+  }
+  printf("Service info: %s\r\n", AT_GetLastResponse());
+
+  MQTT_Config_t config = {
+      .broker_url =
+          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
+      .client_id = "ClientID",
+      .username = "nessie",
+      .password = "D-sub729",
+      .keepalive = 60,
+      .ca_cert = "isrgrootx1.pem"};
+
+  AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
+  HAL_Delay(2000);
+  AT_SendCommand("AT+CCLK?\r\n", NULL, 0);
+
+  if (!MQTT_Init(&config)) {
+    printf("MQTT initialization failed\r\n");
+    return false;
+  }
+
+  printf("Radio initialization complete\r\n");
+  return true;
 }
+
 /**
  * @brief  The application entry point.
  * @retval int
  */
 int main(void) {
 
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick.
-   */
   HAL_Init();
 
   SystemClock_Config();
@@ -143,58 +207,13 @@ int main(void) {
   // Initialize HX711
   HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_SET);
   HX711_Init();
+  HX711_PowerDown();
 
   HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
   HAL_Delay(1000);
-  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
-  HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
 
-  // Wait for module to be ready
-  printf("Waiting for *ATREADY...\r\n");
-  if (AT_WaitForResponse(20000, "*ATREADY")) {
-    printf("Module is ready!\r\n");
-  } else {
-    printf("Timeout waiting for *ATREADY\r\n");
-  }
-
-#if 0
-  if (CertUpload_UploadISRGRootX1()) {
-    printf("Certificate uploaded successfully!\r\n");
-  } else {
-    printf("Certificate upload failed!\r\n");
-  }
-#endif
-  AT_SendCommand("AT\r\n", "OK", 2000);
-  HAL_Delay(1000);
-
-  AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
-
-  // Wait for LTE service
-  printf("Waiting for LTE service...\r\n");
-  while (!has_lte_service()) {
-    printf("No service yet, retrying...\r\n");
-    HAL_Delay(5000);
-  }
-  printf("Service info: %s\r\n", AT_GetLastResponse());
-
-  MQTT_Config_t config = {
-      .broker_url =
-          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
-      .client_id = "ClientID",
-      .username = "nessie",
-      .password = "D-sub729",
-      .keepalive = 60,
-      .ca_cert = "isrgrootx1.pem"};
-
-  AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
-  HAL_Delay(2000);
-  send2module("AT+CCLK?\r\n");
-
-  MQTT_Init(&config);
-
-  printf(
-      "RTC-based sensor reading initialized. Waiting for wakeup events...\r\n");
+  // Initialize radio module
+  RadioInit();
 
   // Enter STOP2 mode immediately - RTC will wake us up
   Enter_STOP2_Mode();
@@ -227,6 +246,7 @@ int main(void) {
 
       // Read sensor value
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
+      HX711_PowerDown();
 
       // Format the sensor data into a JSON message
       char message[128];
@@ -234,25 +254,29 @@ int main(void) {
                "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f}", value, 23.5,
                battery_voltage);
 
-      // Connect to MQTT broker
-      MQTT_Connect();
-      HAL_Delay(500);
+      if (MQTT_Connect()) {
+        HAL_Delay(500);
 
-      // Publish sensor data
-      MQTT_Publish("sensors/a46fb35d/data", message);
-      HAL_Delay(500);
+        // Publish sensor data
+        if (MQTT_Publish("sensors/a46fb35d/data", message)) {
+          HAL_Delay(500);
+          printf("Published weight: %d\r\n", value);
+        } else {
+          printf("MQTT publish failed\r\n");
+        }
 
-      // Disconnect from MQTT
-      MQTT_Disconnect();
-
-      printf("Published weight: %d\r\n", value);
+        // Disconnect from MQTT
+        MQTT_Disconnect();
+      } else {
+        printf("Reinitializing radio due to MQTT failure...\r\n");
+        RadioInit();
+      }
 
       // Put cellular module to sleep
       AT_SendCommand("AT+CSCLK=2\r\n", "OK", 2000);
 
       // Turn off LED
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
-      HX711_PowerDown();
 
       // Enter STOP2 mode until next RTC wakeup
       Enter_STOP2_Mode();

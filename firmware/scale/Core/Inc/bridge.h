@@ -27,6 +27,12 @@ void UART_Bridge_Process(void);
  */
 bool UART_Bridge_ReadByte(uint8_t *byte, uint32_t timeout_ms);
 
+/**
+ * @brief Clear the bridge buffer
+ * @note Useful before starting operations that expect specific responses
+ */
+void UART_Bridge_ClearBuffer(void);
+
 #ifdef __cplusplus
 }
 #endif

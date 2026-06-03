@@ -104,3 +104,12 @@ bool UART_Bridge_ReadByte(uint8_t *byte, uint32_t timeout_ms) {
 
   return false;
 }
+
+/**
+ * @brief Clear the bridge buffer
+ */
+void UART_Bridge_ClearBuffer(void) {
+  // Reset the circular buffer pointers
+  bridge_head = 0;
+  bridge_tail = 0;
+}
