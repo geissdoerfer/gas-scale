@@ -1,6 +1,7 @@
 """
 MQTT client for receiving and processing sensor messages.
 """
+
 import json
 import logging
 import os
@@ -48,19 +49,22 @@ class MQTTIngestor:
                 self.client.tls_set(
                     ca_certs=Config.MQTT_CA_CERT,
                     cert_reqs=ssl.CERT_REQUIRED,
-                    tls_version=ssl.PROTOCOL_TLS
+                    tls_version=ssl.PROTOCOL_TLS,
                 )
-                logger.info(f"TLS configured with CA certificate: {Config.MQTT_CA_CERT}")
+                logger.info(
+                    f"TLS configured with CA certificate: {Config.MQTT_CA_CERT}"
+                )
             else:
                 # Use insecure TLS without certificate verification
                 if Config.MQTT_CA_CERT:
                     logger.warning(f"CA certificate not found: {Config.MQTT_CA_CERT}")
                 self.client.tls_set(
-                    cert_reqs=ssl.CERT_NONE,
-                    tls_version=ssl.PROTOCOL_TLS
+                    cert_reqs=ssl.CERT_NONE, tls_version=ssl.PROTOCOL_TLS
                 )
                 self.client.tls_insecure_set(True)
-                logger.warning("TLS configured without certificate verification (insecure)")
+                logger.warning(
+                    "TLS configured without certificate verification (insecure)"
+                )
         except Exception as e:
             logger.error(f"Failed to configure TLS: {e}")
             raise
@@ -68,11 +72,11 @@ class MQTTIngestor:
     def connect(self):
         """Connect to MQTT broker"""
         try:
-            logger.info(f"Connecting to MQTT broker at {Config.MQTT_BROKER_HOST}:{Config.MQTT_BROKER_PORT}")
+            logger.info(
+                f"Connecting to MQTT broker at {Config.MQTT_BROKER_HOST}:{Config.MQTT_BROKER_PORT}"
+            )
             self.client.connect(
-                Config.MQTT_BROKER_HOST,
-                Config.MQTT_BROKER_PORT,
-                Config.MQTT_KEEPALIVE
+                Config.MQTT_BROKER_HOST, Config.MQTT_BROKER_PORT, Config.MQTT_KEEPALIVE
             )
         except Exception as e:
             logger.error(f"Failed to connect to MQTT broker: {e}")
@@ -105,8 +109,12 @@ class MQTTIngestor:
         """
         try:
             # Parse topic to extract device_id
-            topic_parts = msg.topic.split('/')
-            if len(topic_parts) != 3 or topic_parts[0] != 'sensors' or topic_parts[2] != 'data':
+            topic_parts = msg.topic.split("/")
+            if (
+                len(topic_parts) != 3
+                or topic_parts[0] != "sensors"
+                or topic_parts[2] != "data"
+            ):
                 logger.warning(f"Invalid topic format: {msg.topic}")
                 return
 
@@ -114,7 +122,7 @@ class MQTTIngestor:
 
             # Parse JSON payload
             try:
-                payload = json.loads(msg.payload.decode('utf-8'))
+                payload = json.loads(msg.payload.decode("utf-8"))
             except json.JSONDecodeError as e:
                 logger.error(f"Invalid JSON in message from {msg.topic}: {e}")
                 return
@@ -127,7 +135,9 @@ class MQTTIngestor:
             self._process_message(payload, device_id)
 
         except Exception as e:
-            logger.error(f"Error processing message from {msg.topic}: {e}", exc_info=True)
+            logger.error(
+                f"Error processing message from {msg.topic}: {e}", exc_info=True
+            )
 
     def _validate_message(self, payload: dict) -> bool:
         """
@@ -140,7 +150,7 @@ class MQTTIngestor:
             True if valid, False otherwise
         """
         # Check that at least one sensor value is present
-        sensor_fields = ['value', 'battery_voltage', 'temperature']
+        sensor_fields = ["val", "bat", "temp"]
         has_sensor_value = any(field in payload for field in sensor_fields)
 
         if not has_sensor_value:
@@ -166,19 +176,23 @@ class MQTTIngestor:
             device_id: Device identifier from topic
         """
         # Extract timestamp or use current time
-        if 'timestamp' in payload:
+        if "timestamp" in payload:
             try:
-                timestamp = datetime.fromisoformat(payload['timestamp'].replace('Z', '+00:00'))
+                timestamp = datetime.fromisoformat(
+                    payload["timestamp"].replace("Z", "+00:00")
+                )
             except (ValueError, AttributeError) as e:
-                logger.warning(f"Invalid timestamp format: {payload.get('timestamp')}, using server time")
+                logger.warning(
+                    f"Invalid timestamp format: {payload.get('timestamp')}, using server time"
+                )
                 timestamp = datetime.utcnow()
         else:
             timestamp = datetime.utcnow()
 
         # Extract sensor values (firmware sends 'value' for raw HX711 reading)
-        raw_value = payload.get('value')
-        battery_voltage = payload.get('battery_voltage')
-        temperature = payload.get('temperature')
+        raw_value = payload.get("val")
+        battery_voltage = payload.get("bat")
+        temperature = payload.get("temp")
 
         # Write to database
         try:
@@ -187,7 +201,7 @@ class MQTTIngestor:
                 timestamp=timestamp,
                 raw_value=raw_value,
                 battery_voltage=battery_voltage,
-                temperature=temperature
+                temperature=temperature,
             )
             logger.debug(f"Successfully processed reading for device {device_id}")
         except Exception as e:
