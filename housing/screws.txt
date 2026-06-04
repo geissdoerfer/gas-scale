@@ -1,0 +1,19 @@
+Screws:
+  Feet (M3):
+    - 4mm Base Plate
+    - 2mm Feet
+    - 4mm engagement
+    -> 10mm Screws
+  Battery (M3):
+    - 2mm Plate
+    - 4mm engagement
+    -> 6mm Screws
+  Load Cells (M3):
+    - 2.5mm Load Cell
+    - 3mm Metal Ring
+    - 5.5mm engagement
+    -> 12mm Screws
+  Load Cells (M4):
+    - 2.5mm Screws
+    - 3.5mm engagement
+    -> 6mm Screws
