@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     @property
     def CORS_ORIGINS_LIST(self) -> List[str]:
         """Get CORS origins as list"""
+        # Allow wildcard for development
+        if self.API_CORS_ORIGINS.strip() == "*":
+            return ["*"]
         return [origin.strip() for origin in self.API_CORS_ORIGINS.split(",")]
 
 
