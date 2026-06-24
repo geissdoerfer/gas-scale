@@ -1,19 +1,30 @@
 Screws:
-  Feet (M3):
+  Feet (M3,4):
     - 4mm Base Plate
     - 2mm Feet
     - 4mm engagement
     -> 10mm Screws
-  Battery (M3):
+  Battery (M3,4):
     - 2mm Plate
     - 4mm engagement
     -> 6mm Screws
-  Load Cells (M3):
-    - 2.5mm Load Cell
+  Load Cells (M3,16):
+    - 2.5/2mm Load Cell
     - 3mm Metal Ring
-    - 5.5mm engagement
-    -> 12mm Screws
-  Load Cells (M4):
-    - 2.5mm Screws
-    - 3.5mm engagement
+    - 2.5/3mm engagement
+    -> 8mm Screws
+  Load Cells (M4,4):
+    - 2.5/2mm Load Cell
+    - 3.5/4mm engagement
     -> 6mm Screws
+  PCB (M3, 8)
+    - 1.6mm PCB
+    - 4.4mm engagement
+    -> 6mm Screws
+
+Total:
+ - 4/260 M3 10mm
+ - 16/1040 M3 8mm
+ - 12/780 M3 6mm
+ - 4/260 M4 6mm
+
