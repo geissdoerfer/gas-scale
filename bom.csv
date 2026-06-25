@@ -1,11 +1,15 @@
-USB-C Cable,Alibaba,https://www.alibaba.com/product-detail/USB-C-2Pin-IP68-Waterproof-Connectors_1601224125965.html
-M4 Screws,,
-M3 Screws,,
-Metal Ring,LaserHub,
-LTE Antenna,Alibaba,ChristopherCooper6512@outlook.com
-Battery,Alibaba,
-Base Plate,,
-Sim Card,Holobox,
-Load Cells,Galoce,+86 180 9257 3958
-Housing,Alibaba,paul-zhao@perfectgoodsprototype.com
-A7670,Alibaba
+,Quantity,Price (USD),,
+USB-C Port,1,1,Alibaba,https://www.alibaba.com/product-detail/USB-C-2Pin-IP68-Waterproof-Connectors_1601224125965.html
+M4 6mm,4,0.01,,
+M3 6mm,12,0.01,,
+M3 8mm,16,0.01,,
+M3 10mm,4,0.01,,
+Metal Ring,1,12,LaserHub,
+LTE Antenna,1,1,Alibaba,ChristopherCooper6512@outlook.com
+Battery,1,6,Alibaba,
+Base Plate,1,7.5,Plattenzuschnitt 24,
+Sim Card,1,3,Hologram,
+Load Cells,4,1,Galoce,+86 180 9257 3958
+Lid,1,50,Alibaba,paul-zhao@perfectgoodsprototype.com
+PCB,1,12,,
+,,93.54,,
