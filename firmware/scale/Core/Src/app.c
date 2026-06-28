@@ -123,12 +123,18 @@ static bool RadioInit(void) {
   radio_init_count++;
   printf("Initializing radio module (count: %lu)...\r\n", radio_init_count);
 
+  HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_RESET);
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
+  HAL_Delay(1000);
+
   // Clear any old data from the bridge buffer before starting
   UART_Bridge_ClearBuffer();
   AT_ClearResponse();
 
+  /* Power on module (>500ms, using 1500ms for reliability) */
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
-  HAL_Delay(100);
+  HAL_Delay(1500);
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
 
   // Wait for module to be ready
@@ -140,16 +146,19 @@ static bool RadioInit(void) {
     return false;
   }
 
+  AT_SendCommand("AT\r\n", "OK", 2000);
+  HAL_Delay(1000);
+  AT_SendCommand("AT\r\n", "OK", 2000);
+
 #if 0
+  AT_SendCommand("AT\r\n", "OK", 2000);
+  HAL_Delay(30000);
   if (CertUpload_UploadISRGRootX1()) {
     printf("Certificate uploaded successfully!\r\n");
   } else {
     printf("Certificate upload failed!\r\n");
   }
 #endif
-  AT_SendCommand("AT\r\n", "OK", 2000);
-  HAL_Delay(1000);
-
   AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
 
   // Wait for LTE service
@@ -204,6 +213,20 @@ int main(void) {
   MX_USART3_UART_Init();
   MX_RTC_Init();
 
+  HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
+
+  /* Allow time for a debug request */
+  HAL_Delay(1000);
+
+  /* Don't power up if battery voltage is low */
+  float v_bat;
+  while ((v_bat = Read_Battery_Voltage()) < 4.1) {
+    printf("Battery voltage low: %.2f\r\n", v_bat);
+    if (rtc_wakeup_flag)
+      rtc_wakeup_flag = 0; // Clear the software flag
+    Enter_STOP2_Mode();
+  }
+
   // Initialize UART bridge
   UART_Bridge_Init();
 
@@ -213,17 +236,20 @@ int main(void) {
   HX711_Init();
   HX711_PowerDown();
 
-  HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
-  HAL_Delay(1000);
-
   // Initialize radio module
   RadioInit();
 
-  // Enter STOP2 mode immediately - RTC will wake us up
-  Enter_STOP2_Mode();
-
   while (1) {
     /* USER CODE END WHILE */
+
+    // Put cellular module to sleep
+    AT_SendCommand("AT+CSCLK=2\r\n", "OK", 2000);
+
+    // Turn off LED
+    HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
+
+    // Enter STOP2 mode until next RTC wakeup
+    Enter_STOP2_Mode();
 
     // Check if RTC wakeup event occurred (every 60 seconds)
     if (rtc_wakeup_flag) {
@@ -241,10 +267,10 @@ int main(void) {
       for (unsigned int i = 0; i < 3; i++) {
         if (AT_SendCommand("AT\r\n", "OK", 2000))
           break;
-        else
+        else {
           printf("Didn't receive OK from module\r\n");
+        }
       }
-
       // Turn on LED during sensor read and transmission
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
 
@@ -255,14 +281,14 @@ int main(void) {
       // Format the sensor data into a JSON message
       char message[128];
       snprintf(message, sizeof(message),
-               "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}", value, 23.5,
-               battery_voltage, radio_init_count);
+               "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}", value,
+               23.5, battery_voltage, radio_init_count);
 
       if (MQTT_Connect()) {
         HAL_Delay(500);
 
         // Publish sensor data
-        if (MQTT_Publish("sensors/a46fb35d/data", message)) {
+        if (MQTT_Publish("sensors/c0ffee00/data", message)) {
           HAL_Delay(500);
           printf("Published weight: %d\r\n", value);
         } else {
@@ -275,15 +301,6 @@ int main(void) {
         printf("Reinitializing radio due to MQTT failure...\r\n");
         RadioInit();
       }
-
-      // Put cellular module to sleep
-      AT_SendCommand("AT+CSCLK=2\r\n", "OK", 2000);
-
-      // Turn off LED
-      HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
-
-      // Enter STOP2 mode until next RTC wakeup
-      Enter_STOP2_Mode();
     }
     /* USER CODE BEGIN 3 */
   }
