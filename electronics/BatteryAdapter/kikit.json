@@ -12,7 +12,7 @@
         "tolerance": "50mm"
     },
     "tabs": {
-        "type": "tabs",
+        "type": "fixed",
         "hwidth": "20mm",
         "vwidth": "20mm"
     },
