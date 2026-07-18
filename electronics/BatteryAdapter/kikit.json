@@ -5,7 +5,7 @@
         "cols": 4,
         "space": "2.4mm",
         "renamenet": "Board_{n}-{orig}",
-        "renameref": "{orig}"
+        "renameref": "{orig}_{n}"
     },
     "source": {
         "type": "auto",
@@ -28,7 +28,8 @@
     "post": {
         "type": "auto",
         "millradius": "1mm",
-        "refillzones": true
+        "refillzones": true,
+        "origin": "bl"
     },
     "copperfill": {
         "type": "hatched",
