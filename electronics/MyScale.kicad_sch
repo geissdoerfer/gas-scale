@@ -5467,10 +5467,10 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
+		(in_pos_files no)
+		(dnp yes)
 		(uuid "26b0fa25-4332-41f4-b329-604365a3a5f4")
 		(property "Reference" "J12"
 			(at 69.85 -85.852 0)
