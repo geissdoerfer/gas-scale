@@ -6386,7 +6386,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_DFN_QFN:QFN-48-1EP_7x7mm_P0.5mm_EP5.6x5.6mm"
+		(property "Footprint" "MyScale:QFN-48-1EP_7x7mm_P0.5mm_EP5.6x5.6mm"
 			(at 199.39 139.7 0)
 			(hide yes)
 			(show_name no)
