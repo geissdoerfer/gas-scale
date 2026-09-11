@@ -47,10 +47,13 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     Core/Src/app.c
     Core/Src/at_commands.c
+    Core/Src/battery.c
     Core/Src/bridge.c
     Core/Src/hx711.c
     Core/Src/cert_upload.c
     Core/Src/mqtt.c
+    Core/Src/power.c
+    Core/Src/radio.c
 )
 
 # Add include paths
