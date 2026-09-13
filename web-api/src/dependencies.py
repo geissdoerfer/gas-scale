@@ -62,6 +62,53 @@ def get_current_user(
     return user
 
 
+def get_current_device(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> models.Device:
+    """
+    Get the device identified by a device-scoped token (issued by POST /devices/pair).
+
+    Separate from get_current_user: this token has no associated user account, it just
+    identifies one paired device (scope="device", sub=device_id).
+
+    Args:
+        credentials: HTTP authorization credentials with Bearer token
+        db: Database session
+
+    Returns:
+        The paired device
+
+    Raises:
+        HTTPException: If token is invalid, not a device token, or the device no longer exists
+    """
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate device credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = decode_token(credentials.credentials)
+
+        if payload.get("scope") != "device":
+            raise credentials_exception
+
+        device_id: Optional[str] = payload.get("sub")
+        if device_id is None:
+            raise credentials_exception
+
+    except JWTError:
+        raise credentials_exception
+
+    device = db.query(models.Device).filter(models.Device.device_id == device_id).first()
+
+    if device is None:
+        raise credentials_exception
+
+    return device
+
+
 def require_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
     """
     Dependency to require admin role.

@@ -27,16 +27,23 @@ CREATE TABLE devices (
     description TEXT,
     "offset" FLOAT DEFAULT -256620.0 NOT NULL,
     gain FLOAT DEFAULT -0.09121 NOT NULL,
+    -- DB-level default as a safety net for any insert path that doesn't set this column
+    -- explicitly; see database/migrations/002_*.sql.
+    pairing_secret VARCHAR(64) DEFAULT md5(random()::text || clock_timestamp()::text) NOT NULL,
+    cylinder_type VARCHAR(10),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Index for fast device_id lookups
 CREATE INDEX idx_devices_device_id ON devices(device_id);
+CREATE UNIQUE INDEX ix_devices_pairing_secret ON devices(pairing_secret);
 
 -- Comments for calibration columns
 COMMENT ON COLUMN devices."offset" IS 'Calibration offset: raw_value + offset';
 COMMENT ON COLUMN devices.gain IS 'Calibration gain/scale factor: (raw_value + offset) * gain = weight';
+COMMENT ON COLUMN devices.pairing_secret IS 'Printed as a QR code on the device label; used by POST /devices/pair to self-pair without a user account. Static, not one-time-use.';
+COMMENT ON COLUMN devices.cylinder_type IS 'One of 3kg / 6kg / 12kg / 45kg. Null until the app completes onboarding.';
 
 -- ===== USER DEVICE ACCESS TABLE =====
 CREATE TABLE user_device_access (

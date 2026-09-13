@@ -1,17 +1,28 @@
 """
 Device management and query endpoints.
 """
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import List
 
 from src.database import get_db
-from src.dependencies import require_admin, get_current_user, check_device_access
+from src.dependencies import require_admin, get_current_user, get_current_device, check_device_access
 from src import models
 from src import schemas
+from src import auth
+from src.cylinder_specs import gas_percentage_remaining, battery_percentage
 
 router = APIRouter(prefix="/devices", tags=["Devices"])
+
+# Device-scoped pairing tokens (see POST /devices/pair) have no refresh flow, so they're
+# issued long-lived rather than expiring like user access tokens do.
+DEVICE_TOKEN_EXPIRE = timedelta(days=365)
+
+# Existing low-battery threshold used elsewhere in this router (GET /devices/{device_id}).
+LOW_BATTERY_VOLTAGE = 11.5
 
 
 @router.get("", response_model=List[schemas.DeviceResponse])
@@ -37,7 +48,7 @@ def list_devices(
     return devices
 
 
-@router.post("", response_model=schemas.DeviceResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.DeviceCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_device(
     device_data: schemas.DeviceCreate,
     current_user: models.User = Depends(require_admin),
@@ -237,3 +248,117 @@ def update_device_calibration(
     db.refresh(device)
 
     return device
+
+
+# --- Account-less device pairing (Android app; see android/app_plan.md) --------------------
+#
+# These endpoints authenticate with a device-scoped token (get_current_device) rather than
+# a user JWT — pairing with the correct device_id + pairing_secret *is* the credential, there
+# is no separate user account involved.
+
+def _build_device_status(device: models.Device, db: Session) -> dict:
+    """Shared status payload for the cylinder-update and status endpoints."""
+    latest = db.query(models.SensorReading).filter(
+        models.SensorReading.device_id == device.device_id
+    ).order_by(desc(models.SensorReading.time)).first()
+
+    if device.cylinder_type is None:
+        return {
+            "device_id": device.device_id,
+            "cylinder_type": None,
+            "percentage_remaining": None,
+            "battery_percentage": None,
+            "battery_voltage": latest.battery_voltage if latest else None,
+            "last_updated": latest.time if latest else None,
+            "status": "not_configured",
+        }
+
+    if latest is None:
+        return {
+            "device_id": device.device_id,
+            "cylinder_type": device.cylinder_type,
+            "percentage_remaining": None,
+            "battery_percentage": None,
+            "battery_voltage": None,
+            "last_updated": None,
+            "status": "no_data",
+        }
+
+    percentage_remaining = None
+    if latest.raw_value is not None:
+        weight_kg = (latest.raw_value + device.offset) * device.gain
+        percentage_remaining = gas_percentage_remaining(weight_kg, device.cylinder_type)
+
+    battery_pct = None
+    if latest.battery_voltage is not None:
+        battery_pct = battery_percentage(latest.battery_voltage)
+
+    status_value = "ok"
+    if latest.battery_voltage is not None and latest.battery_voltage < LOW_BATTERY_VOLTAGE:
+        status_value = "low_battery"
+
+    return {
+        "device_id": device.device_id,
+        "cylinder_type": device.cylinder_type,
+        "percentage_remaining": percentage_remaining,
+        "battery_percentage": battery_pct,
+        "battery_voltage": latest.battery_voltage,
+        "last_updated": latest.time,
+        "status": status_value,
+    }
+
+
+@router.post("/pair", response_model=schemas.DevicePairResponse)
+def pair_device(
+    pairing: schemas.DevicePairRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Pair with a device using the device_id + pairing_secret printed on its QR code label
+    (scanned or entered manually). No user account required — returns a device-scoped
+    token to use for /devices/me/* endpoints.
+    """
+    device = db.query(models.Device).filter(models.Device.device_id == pairing.device_id).first()
+
+    if not device or device.pairing_secret != pairing.secret:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid device ID or pairing secret"
+        )
+
+    access_token = auth.create_access_token(
+        {"sub": device.device_id, "scope": "device"},
+        expires_delta=DEVICE_TOKEN_EXPIRE
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "device_id": device.device_id,
+    }
+
+
+@router.patch("/me/cylinder", response_model=schemas.DeviceStatusResponse)
+def set_cylinder_type(
+    update: schemas.CylinderUpdateRequest,
+    current_device: models.Device = Depends(get_current_device),
+    db: Session = Depends(get_db)
+):
+    """Set or change the cylinder type for the paired device (device-token authenticated)."""
+    current_device.cylinder_type = update.cylinder_type.value
+    db.commit()
+    db.refresh(current_device)
+
+    return _build_device_status(current_device, db)
+
+
+@router.get("/me/status", response_model=schemas.DeviceStatusResponse)
+def get_paired_device_status(
+    current_device: models.Device = Depends(get_current_device),
+    db: Session = Depends(get_db)
+):
+    """
+    Get the paired device's current gas percentage and battery level (device-token
+    authenticated). This is the endpoint the app polls for its main gauge screen.
+    """
+    return _build_device_status(current_device, db)

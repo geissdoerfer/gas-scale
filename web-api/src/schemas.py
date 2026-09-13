@@ -13,6 +13,13 @@ class UserRole(str, Enum):
     USER = "user"
 
 
+class CylinderType(str, Enum):
+    KG_3 = "3kg"
+    KG_6 = "6kg"
+    KG_12 = "12kg"
+    KG_45 = "45kg"
+
+
 # User Schemas
 class UserBase(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
@@ -80,6 +87,38 @@ class DeviceResponse(DeviceBase):
 class DeviceWithLatestReading(DeviceResponse):
     latest_reading: Optional['SensorReadingResponse'] = None
     status: Optional[str] = "unknown"
+
+
+class DeviceCreateResponse(DeviceResponse):
+    """Returned only right after admin provisioning (POST /devices) — the one time the
+    pairing secret needs to be shown, to print it as the device's QR code label."""
+    pairing_secret: str
+
+
+# Account-less device pairing schemas (Android app; see android/app_plan.md)
+class DevicePairRequest(BaseModel):
+    device_id: str = Field(..., min_length=1, max_length=50)
+    secret: str = Field(..., min_length=1)
+
+
+class DevicePairResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    device_id: str
+
+
+class CylinderUpdateRequest(BaseModel):
+    cylinder_type: CylinderType
+
+
+class DeviceStatusResponse(BaseModel):
+    device_id: str
+    cylinder_type: Optional[CylinderType] = None
+    percentage_remaining: Optional[int] = None
+    battery_percentage: Optional[int] = None
+    battery_voltage: Optional[float] = None
+    last_updated: Optional[datetime] = None
+    status: str  # ok | low_battery | not_configured | no_data
 
 
 # Sensor Reading Schemas

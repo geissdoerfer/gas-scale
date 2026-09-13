@@ -1,6 +1,8 @@
 """
 SQLAlchemy ORM models for database tables.
 """
+import secrets
+
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Table, TIMESTAMP
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -33,6 +35,15 @@ class Device(Base):
     description = Column(String)
     offset = Column(Float, default=0.0, nullable=False, server_default="0.0")
     gain = Column(Float, default=1.0, nullable=False, server_default="1.0")
+    # Printed as a QR code on the device label; used by the Android app to self-pair
+    # without a user account (POST /devices/pair). Static and reusable, not one-time.
+    pairing_secret = Column(
+        String(64), unique=True, nullable=False, index=True,
+        default=lambda: secrets.token_hex(16)
+    )
+    # One of "3kg" / "6kg" / "12kg" / "45kg" (schemas.CylinderType), null until the
+    # app completes onboarding. Drives the server-side gas percentage calculation.
+    cylinder_type = Column(String(10), nullable=True)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 

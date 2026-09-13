@@ -78,6 +78,42 @@
       </div>
     </div>
 
+    <!-- Pairing Info Modal (shown once, right after a device is created) -->
+    <div v-if="pairingResult" class="modal" @click.self="closePairingModal">
+      <div class="modal-content">
+        <h3>Device created: {{ pairingResult.device_id }}</h3>
+
+        <p class="pairing-warning">
+          This pairing secret is shown <strong>only now</strong> — the server won't return it
+          again. Print this as the device's QR label before closing this dialog.
+        </p>
+
+        <div class="qr-wrapper">
+          <img v-if="pairingResult.qrDataUrl" :src="pairingResult.qrDataUrl" alt="Pairing QR code" class="qr-image" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Pairing secret</label>
+          <div class="copy-row">
+            <input type="text" :value="pairingResult.secret" readonly class="form-input" />
+            <button @click="copyToClipboard(pairingResult.secret)" class="btn btn-secondary btn-sm">Copy</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">QR payload</label>
+          <div class="copy-row">
+            <input type="text" :value="pairingResult.payload" readonly class="form-input" />
+            <button @click="copyToClipboard(pairingResult.payload)" class="btn btn-secondary btn-sm">Copy</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button @click="closePairingModal" class="btn btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Assign Device Modal -->
     <div v-if="assigningDevice" class="modal" @click.self="closeAssignModal">
       <div class="modal-content">
@@ -108,6 +144,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import QRCode from 'qrcode'
 import { devicesAPI, usersAPI } from '@/services/api'
 import NavigationBar from '@/components/NavigationBar.vue'
 
@@ -119,6 +156,7 @@ const showCreateModal = ref(false)
 const editingDevice = ref(null)
 const assigningDevice = ref(null)
 const submitting = ref(false)
+const pairingResult = ref(null)
 
 const deviceForm = ref({
   device_id: '',
@@ -211,16 +249,40 @@ const submitDevice = async () => {
         name: deviceForm.value.name,
         description: deviceForm.value.description,
       })
+      closeModal()
     } else {
-      await devicesAPI.create(deviceForm.value)
+      const response = await devicesAPI.create(deviceForm.value)
+      closeModal()
+      await showPairingResult(response.data)
     }
 
     await fetchDevices()
-    closeModal()
   } catch (err) {
     error.value = err.response?.data?.detail || 'Failed to save device'
   } finally {
     submitting.value = false
+  }
+}
+
+const showPairingResult = async (device) => {
+  const payload = `verolic://pair?device_id=${encodeURIComponent(device.device_id)}&secret=${encodeURIComponent(device.pairing_secret)}`
+  pairingResult.value = {
+    device_id: device.device_id,
+    secret: device.pairing_secret,
+    payload,
+    qrDataUrl: await QRCode.toDataURL(payload, { width: 240 }),
+  }
+}
+
+const closePairingModal = () => {
+  pairingResult.value = null
+}
+
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    // Clipboard API unavailable (e.g. insecure context) - the field is still selectable/readable.
   }
 }
 
@@ -411,5 +473,37 @@ onMounted(() => {
 textarea.form-input {
   resize: vertical;
   font-family: inherit;
+}
+
+.pairing-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.qr-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.qr-image {
+  width: 240px;
+  height: 240px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.copy-row {
+  display: flex;
+  gap: 8px;
+}
+
+.copy-row .form-input {
+  font-family: monospace;
+  font-size: 13px;
 }
 </style>

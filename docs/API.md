@@ -373,9 +373,16 @@ Create a new device.
   "device_id": "device_003",
   "name": "Sensor 003",
   "description": "New sensor in Building C",
+  "offset": 0.0,
+  "gain": 1.0,
+  "pairing_secret": "a1b2c3d4e5f6...",
   "created_at": "2026-01-21T12:00:00Z"
 }
 ```
+
+`pairing_secret` is only ever returned here — print it as the device's QR code label (see
+[Device Pairing Endpoints](#device-pairing-endpoints-account-less)). It isn't included in
+`GET /devices` / `GET /devices/{device_id}` responses.
 
 **Errors:**
 - `400` - Device ID already exists
@@ -537,6 +544,92 @@ List all users assigned to a device.
   ]
 }
 ```
+
+---
+
+## Device Pairing Endpoints (Account-less)
+
+Used by the Android app (`android/app_plan.md`) instead of `/auth/login` — there is no user
+account in this flow. Pairing with the correct `device_id` + `pairing_secret` (printed as a
+QR code on the device label, generated automatically when the device is created via
+`POST /devices`) is itself the credential. The returned token is scoped to that one device
+only and is required as a Bearer token for the `/devices/me/*` endpoints below.
+
+### POST /devices/pair
+
+Pair with a device using its ID and pairing secret (scanned from its QR code, or entered manually).
+
+**Permissions:** None (public) — the secret itself is the authorization.
+
+**Request:**
+```json
+{
+  "device_id": "device_001",
+  "secret": "a1b2c3d4e5f6..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer",
+  "device_id": "device_001"
+}
+```
+
+**Errors:**
+- `401` - Unknown device ID or secret doesn't match
+
+---
+
+### PATCH /devices/me/cylinder
+
+Set or change the gas cylinder type currently on the paired device.
+
+**Permissions:** Device token (from `POST /devices/pair`)
+
+**Request:**
+```json
+{
+  "cylinder_type": "12kg"
+}
+```
+Allowed values: `"3kg"`, `"6kg"`, `"12kg"`, `"45kg"`.
+
+**Response (200):** same shape as `GET /devices/me/status` below, reflecting the new type.
+
+---
+
+### GET /devices/me/status
+
+Get the paired device's current gas percentage and battery level. This is the endpoint the
+app polls for its main gauge screen — the percentage is always computed server-side.
+
+**Permissions:** Device token (from `POST /devices/pair`)
+
+**Response (200):**
+```json
+{
+  "device_id": "device_001",
+  "cylinder_type": "12kg",
+  "percentage_remaining": 63,
+  "battery_percentage": 82,
+  "battery_voltage": 12.4,
+  "last_updated": "2026-09-13T10:02:00Z",
+  "status": "ok"
+}
+```
+
+`status` is one of:
+- `ok` - normal operation
+- `low_battery` - `battery_voltage` below 11.5V
+- `not_configured` - `cylinder_type` hasn't been set yet (`percentage_remaining` is `null`)
+- `no_data` - no sensor reading received yet (`percentage_remaining` is `null`)
+
+**Note:** the tare/full weight per cylinder size (`web-api/src/cylinder_specs.py`) and the
+battery voltage→percentage curve are placeholder estimates, not yet verified against real
+hardware — see the open questions in `android/app_plan.md`.
 
 ---
 
@@ -734,10 +827,16 @@ Get dashboard summary: all accessible devices with latest readings.
   device_id: string;
   name: string | null;
   description: string | null;
+  offset: number;
+  gain: number;
+  cylinder_type: "3kg" | "6kg" | "12kg" | "45kg" | null;
   created_at: string; // ISO 8601
   updated_at: string; // ISO 8601
 }
 ```
+
+`pairing_secret` is part of the underlying record but is only ever exposed in the
+`POST /devices` response — see [Device Pairing Endpoints](#device-pairing-endpoints-account-less).
 
 ### SensorReading
 

@@ -42,34 +42,26 @@ class DatabaseWriter:
         """Return connection to pool"""
         self.connection_pool.putconn(conn)
 
-    def _ensure_device_exists(self, conn, device_id: str):
+    def _device_exists(self, conn, device_id: str) -> bool:
         """
-        Ensure device exists in database (auto-register if not).
+        Check whether a device has been provisioned. Devices are no longer auto-registered
+        on first message - they must be created ahead of time (see ../../register_device.py
+        or the admin UI's "Create Device" form), which is also what generates the device's
+        pairing_secret for the Android app.
 
         Args:
             conn: Database connection
             device_id: Device identifier
+
+        Returns:
+            True if the device exists
         """
         with conn.cursor() as cursor:
-            # Check if device exists
             cursor.execute(
-                "SELECT id FROM devices WHERE device_id = %s",
+                "SELECT 1 FROM devices WHERE device_id = %s",
                 (device_id,)
             )
-            result = cursor.fetchone()
-
-            if result is None:
-                # Device doesn't exist, insert it
-                cursor.execute(
-                    """
-                    INSERT INTO devices (device_id, name, description)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (device_id) DO NOTHING
-                    """,
-                    (device_id, f"Device {device_id}", "Auto-registered device")
-                )
-                conn.commit()
-                logger.info(f"Auto-registered new device: {device_id}")
+            return cursor.fetchone() is not None
 
     def insert_reading(
         self,
@@ -93,8 +85,13 @@ class DatabaseWriter:
         try:
             conn = self._get_connection()
 
-            # Ensure device exists
-            self._ensure_device_exists(conn, device_id)
+            # Reject readings from devices that haven't been provisioned yet.
+            if not self._device_exists(conn, device_id):
+                logger.warning(
+                    f"Rejecting reading for unregistered device '{device_id}' - "
+                    "provision it first (register_device.py or the admin UI)"
+                )
+                return
 
             # Insert reading (idempotent with ON CONFLICT)
             with conn.cursor() as cursor:
