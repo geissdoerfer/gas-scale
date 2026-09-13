@@ -3,7 +3,8 @@
 MQTT Test Data Publisher
 
 Publishes random sensor data to MQTT broker for testing purposes.
-Simulates IoT device sending weight (in grams), battery voltage, and temperature readings.
+Simulates the firmware (firmware/scale/Core/Src/app.c), which publishes
+{"val": <raw HX711 reading>, "temp": <float>, "bat": <battery voltage>, "cnt": <radio init count>}.
 
 Usage:
     python test_mqtt_publisher.py --device-id sensor_001 --rate 1.0
@@ -27,19 +28,20 @@ except ImportError:
 class SensorDataGenerator:
     """Generates realistic sensor data with some variation"""
 
-    def __init__(self, base_weight=1500.0, base_voltage=12.6, base_temp=23.0):
-        self.base_weight = base_weight
+    def __init__(self, base_val=1500.0, base_voltage=12.6, base_temp=23.0):
+        self.base_val = base_val
         self.base_voltage = base_voltage
         self.base_temp = base_temp
-        self.weight_trend = 0.0
+        self.val_trend = 0.0
         self.voltage_trend = 0.0
         self.temp_trend = 0.0
+        self.cnt = random.randint(0, 100)
 
     def generate(self):
         """Generate a reading with realistic variations"""
         # Add random walk to trends
-        self.weight_trend += random.uniform(-10.0, 10.0)
-        self.weight_trend = max(-200.0, min(200.0, self.weight_trend))  # Limit trend
+        self.val_trend += random.uniform(-10.0, 10.0)
+        self.val_trend = max(-200.0, min(200.0, self.val_trend))  # Limit trend
 
         self.voltage_trend += random.uniform(-0.02, 0.02)
         self.voltage_trend = max(-0.5, min(0.5, self.voltage_trend))
@@ -48,19 +50,22 @@ class SensorDataGenerator:
         self.temp_trend = max(-2.0, min(2.0, self.temp_trend))
 
         # Generate values with noise
-        weight = self.base_weight + self.weight_trend + random.uniform(-50.0, 50.0)
+        val = self.base_val + self.val_trend + random.uniform(-50.0, 50.0)
         voltage = self.base_voltage + self.voltage_trend + random.uniform(-0.1, 0.1)
         temp = self.base_temp + self.temp_trend + random.uniform(-0.5, 0.5)
 
         # Ensure realistic bounds
-        weight = max(0.0, min(5000.0, weight))  # 0 to 5kg in grams
+        val = max(0.0, min(5000.0, val))  # raw HX711 reading (arbitrary test scale)
         voltage = max(10.0, min(14.0, voltage))
         temp = max(-10.0, min(50.0, temp))
 
+        self.cnt += 1
+
         return {
-            "weight": round(weight, 2),
-            "battery_voltage": round(voltage, 2),
-            "temperature": round(temp, 2),
+            "val": round(val),
+            "temp": round(temp, 3),
+            "bat": round(voltage, 3),
+            "cnt": self.cnt,
         }
 
 
@@ -77,7 +82,7 @@ def on_publish(client, userdata, mid, reason_codes=None, properties=None):
     userdata["publish_count"] += 1
 
 
-def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
+def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode, username=None, password=None, tls=False):
     """
     Publish sensor data at specified rate
 
@@ -89,6 +94,9 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         port: MQTT broker port
         topic_prefix: Topic prefix (device_id will be appended)
         mode: Data generation mode (realistic, random, or stable)
+        username: MQTT username (optional)
+        password: MQTT password (optional)
+        tls: Connect using TLS (required by brokers like HiveMQ Cloud, typically on port 8883)
     """
     # Create client with callback data
     userdata = {"publish_count": 0}
@@ -97,6 +105,12 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         client_id=f"test_publisher_{device_id}",
         userdata=userdata,
     )
+
+    if username is not None:
+        client.username_pw_set(username, password)
+
+    if tls:
+        client.tls_set()
 
     client.on_connect = on_connect
     client.on_publish = on_publish
@@ -123,7 +137,7 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         generator = SensorDataGenerator()
     elif mode == "random":
         generator = SensorDataGenerator(
-            base_weight=random.uniform(500, 3000),
+            base_val=random.uniform(500, 3000),
             base_voltage=random.uniform(11.5, 13.0),
             base_temp=random.uniform(15, 30),
         )
@@ -131,9 +145,10 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
         generator = SensorDataGenerator()
         # Override generate to return stable values
         generator.generate = lambda: {
-            "weight": 1500.0,
-            "battery_voltage": 12.6,
-            "temperature": 23.0,
+            "val": 1500,
+            "temp": 23.0,
+            "bat": 12.6,
+            "cnt": generator.cnt,
         }
 
     print(f"\nPublishing to topic: {topic}")
@@ -163,9 +178,10 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode):
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
                 message_count += 1
                 print(
-                    f"[{message_count:4d}] Published: Weight={data['weight']:7.2f}g  "
-                    f"Voltage={data['battery_voltage']:5.2f}V  "
-                    f"Temp={data['temperature']:5.2f}°C"
+                    f"[{message_count:4d}] Published: val={data['val']:5d}  "
+                    f"bat={data['bat']:5.2f}V  "
+                    f"temp={data['temp']:5.2f}°C  "
+                    f"cnt={data['cnt']}"
                 )
             else:
                 print(f"✗ Publish failed: {result.rc}")
@@ -207,6 +223,12 @@ Examples:
 
   # Publish to custom broker
   %(prog)s --device-id sensor_001 --broker 192.168.1.100 --port 1883
+
+  # Publish with broker authentication
+  %(prog)s --device-id sensor_001 --username myuser --password mypass
+
+  # Publish to HiveMQ Cloud (TLS on port 8883)
+  %(prog)s --device-id sensor_001 --broker xxxx.s1.eu.hivemq.cloud --port 8883 --tls --username myuser --password mypass
         """,
     )
 
@@ -243,6 +265,26 @@ Examples:
     )
 
     parser.add_argument(
+        "--username",
+        type=str,
+        default=None,
+        help="MQTT username (default: none, connect anonymously)",
+    )
+
+    parser.add_argument(
+        "--password",
+        type=str,
+        default=None,
+        help="MQTT password (default: none)",
+    )
+
+    parser.add_argument(
+        "--tls",
+        action="store_true",
+        help="Connect using TLS (required by brokers like HiveMQ Cloud, typically port 8883)",
+    )
+
+    parser.add_argument(
         "--topic-prefix",
         type=str,
         default="sensors",
@@ -269,6 +311,10 @@ Examples:
     if args.duration is not None and args.duration <= 0:
         parser.error("Duration must be positive")
 
+    # Validate credentials
+    if args.password is not None and args.username is None:
+        parser.error("--password requires --username")
+
     # Run publisher
     publish_data(
         device_id=args.device_id,
@@ -278,6 +324,9 @@ Examples:
         port=args.port,
         topic_prefix=args.topic_prefix,
         mode=args.mode,
+        username=args.username,
+        password=args.password,
+        tls=args.tls,
     )
 
 
