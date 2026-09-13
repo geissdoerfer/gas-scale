@@ -103,6 +103,32 @@ class TestCreateDevice:
         assert data["device_id"] == "new_device_001"
         assert data["name"] == "New Device"
 
+    def test_create_device_with_calibration(self, client, auth_headers_admin):
+        """Offset/gain supplied at creation time must actually be persisted, not silently
+        dropped in favor of the column defaults."""
+        device_data = {
+            "device_id": "calibrated_device_001",
+            "name": "Pre-calibrated device",
+            "offset": -256620.0,
+            "gain": -0.09121,
+        }
+        response = client.post("/devices", json=device_data, headers=auth_headers_admin)
+        assert response.status_code == 201
+        data = response.json()
+
+        assert data["offset"] == -256620.0
+        assert data["gain"] == -0.09121
+
+    def test_create_device_default_calibration(self, client, auth_headers_admin):
+        """Omitting offset/gain at creation time means 'not calibrated yet' (0.0/1.0)."""
+        device_data = {"device_id": "uncalibrated_device_001"}
+        response = client.post("/devices", json=device_data, headers=auth_headers_admin)
+        assert response.status_code == 201
+        data = response.json()
+
+        assert data["offset"] == 0.0
+        assert data["gain"] == 1.0
+
     def test_create_device_duplicate_id(self, client, auth_headers_admin, sample_device):
         """Test creating device with duplicate ID."""
         device_data = {
@@ -223,7 +249,8 @@ class TestGetLatestReading:
         data = response.json()
 
         assert data["device_id"] == "test_device_001"
-        assert data["load"] == 45.2
+        assert data["raw_value"] == 1500.0
+        assert data["weight"] == 1500.0  # sample_device has default offset=0/gain=1
         assert data["battery_voltage"] == 12.6
         assert data["temperature"] == 23.5
 
@@ -234,3 +261,48 @@ class TestGetLatestReading:
             headers=auth_headers_admin
         )
         assert response.status_code == 404
+
+
+@pytest.mark.devices
+class TestCalibration:
+    """Test the PATCH /devices/{device_id}/calibration endpoint."""
+
+    def test_set_calibration(self, client, auth_headers_admin, sample_device):
+        response = client.patch(
+            f"/devices/{sample_device.device_id}/calibration",
+            json={"offset": 10.0, "gain": 2.0},
+            headers=auth_headers_admin,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["offset"] == 10.0
+        assert data["gain"] == 2.0
+
+    def test_set_negative_gain(self, client, auth_headers_admin, sample_device):
+        """A load cell can legitimately need a negative gain to invert its polarity -
+        this must not be rejected the way a plain gt=0 constraint would."""
+        response = client.patch(
+            f"/devices/{sample_device.device_id}/calibration",
+            json={"offset": -256620.0, "gain": -0.09121},
+            headers=auth_headers_admin,
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["offset"] == -256620.0
+        assert data["gain"] == -0.09121
+
+    def test_set_zero_gain_rejected(self, client, auth_headers_admin, sample_device):
+        response = client.patch(
+            f"/devices/{sample_device.device_id}/calibration",
+            json={"offset": 0.0, "gain": 0.0},
+            headers=auth_headers_admin,
+        )
+        assert response.status_code == 422
+
+    def test_calibration_requires_admin(self, client, auth_headers_user, sample_device):
+        response = client.patch(
+            f"/devices/{sample_device.device_id}/calibration",
+            json={"offset": 10.0, "gain": 2.0},
+            headers=auth_headers_user,
+        )
+        assert response.status_code == 403

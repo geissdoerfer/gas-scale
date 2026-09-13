@@ -13,16 +13,14 @@ from src.dependencies import require_admin, get_current_user, get_current_device
 from src import models
 from src import schemas
 from src import auth
-from src.cylinder_specs import gas_percentage_remaining, battery_percentage
+from src.calibration import calculate_weight, reading_to_dict
+from src.cylinder_specs import gas_percentage_remaining, battery_percentage, LOW_BATTERY_VOLTAGE
 
 router = APIRouter(prefix="/devices", tags=["Devices"])
 
 # Device-scoped pairing tokens (see POST /devices/pair) have no refresh flow, so they're
 # issued long-lived rather than expiring like user access tokens do.
 DEVICE_TOKEN_EXPIRE = timedelta(days=365)
-
-# Existing low-battery threshold used elsewhere in this router (GET /devices/{device_id}).
-LOW_BATTERY_VOLTAGE = 11.5
 
 
 @router.get("", response_model=List[schemas.DeviceResponse])
@@ -65,7 +63,9 @@ def create_device(
     new_device = models.Device(
         device_id=device_data.device_id,
         name=device_data.name,
-        description=device_data.description
+        description=device_data.description,
+        offset=device_data.offset,
+        gain=device_data.gain
     )
 
     db.add(new_device)
@@ -98,25 +98,12 @@ def get_device(
     ).order_by(desc(models.SensorReading.time)).first()
 
     # Apply calibration to latest reading
-    latest_reading_dict = None
-    if latest:
-        weight = None
-        if latest.raw_value is not None:
-            weight = (latest.raw_value + device.offset) * device.gain
-
-        latest_reading_dict = {
-            "time": latest.time,
-            "device_id": latest.device_id,
-            "raw_value": latest.raw_value,
-            "weight": weight,
-            "battery_voltage": latest.battery_voltage,
-            "temperature": latest.temperature
-        }
+    latest_reading_dict = reading_to_dict(latest, device.offset, device.gain) if latest else None
 
     # Determine status
     status_value = "unknown"
     if latest:
-        if latest.battery_voltage and latest.battery_voltage < 11.5:
+        if latest.battery_voltage and latest.battery_voltage < LOW_BATTERY_VOLTAGE:
             status_value = "low_battery"
         else:
             status_value = "ok"
@@ -285,8 +272,8 @@ def _build_device_status(device: models.Device, db: Session) -> dict:
         }
 
     percentage_remaining = None
-    if latest.raw_value is not None:
-        weight_kg = (latest.raw_value + device.offset) * device.gain
+    weight_kg = calculate_weight(latest.raw_value, device.offset, device.gain)
+    if weight_kg is not None:
         percentage_remaining = gas_percentage_remaining(weight_kg, device.cylinder_type)
 
     battery_pct = None

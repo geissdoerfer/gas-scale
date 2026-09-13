@@ -362,9 +362,17 @@ Create a new device.
 {
   "device_id": "device_003",
   "name": "Sensor 003",
-  "description": "New sensor in Building C"
+  "description": "New sensor in Building C",
+  "offset": 0.0,
+  "gain": 1.0
 }
 ```
+
+`offset`/`gain` are optional (default `0.0`/`1.0`, meaning "not calibrated yet" -
+`weight = raw_value` unchanged). Pass a known calibration fit here if you have one (also
+supported by `register_device.py --offset --gain`); otherwise set/update it later via
+`PATCH /devices/{device_id}/calibration`. `gain` must be non-zero — negative is fine and
+expected for load cells wired such that raw ADC counts decrease as weight increases.
 
 **Response (201):**
 ```json
@@ -386,6 +394,7 @@ Create a new device.
 
 **Errors:**
 - `400` - Device ID already exists
+- `422` - `gain` is zero
 
 ---
 
@@ -544,6 +553,34 @@ List all users assigned to a device.
   ]
 }
 ```
+
+---
+
+### PATCH /devices/{device_id}/calibration
+
+Set a device's weight calibration fit.
+
+**Permissions:** Admin only
+
+**Request:**
+```json
+{
+  "offset": -256620.0,
+  "gain": -0.09121
+}
+```
+
+`weight = (raw_value + offset) * gain`. Both fields are required (this replaces the fit
+entirely, it doesn't patch one field). `gain` must be non-zero — negative is fine and
+expected for a load cell wired such that raw ADC counts decrease as weight increases; only
+`gain = 0` (which would zero out every reading) is rejected. Also settable at device
+creation time via `POST /devices`.
+
+**Response (200):** the updated [Device](#device) object.
+
+**Errors:**
+- `404` - Device not found
+- `422` - `gain` is zero
 
 ---
 

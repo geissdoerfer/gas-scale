@@ -82,6 +82,7 @@ export const devicesAPI = {
   create: (deviceData) => api.post('/devices', deviceData),
   update: (deviceId, deviceData) => api.put(`/devices/${deviceId}`, deviceData),
   delete: (deviceId) => api.delete(`/devices/${deviceId}`),
+  calibrate: (deviceId, calibration) => api.patch(`/devices/${deviceId}/calibration`, calibration),
   assign: (deviceId, userId) => api.post(`/devices/${deviceId}/assign`, { user_id: userId }),
   unassign: (deviceId, userId) => api.delete(`/devices/${deviceId}/unassign/${userId}`),
   getLatest: (deviceId) => api.get(`/devices/${deviceId}/latest`),

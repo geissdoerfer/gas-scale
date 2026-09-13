@@ -79,17 +79,31 @@ Examples:
 
   # Against a non-default API URL
   %(prog)s --device-id bbc456 --admin-username admin --api-url https://api.example.com
+
+  # With a known calibration fit (weight = (raw_value + offset) * gain)
+  %(prog)s --device-id bbc456 --admin-username admin --offset -256620.0 --gain -0.09121
         """,
     )
 
     parser.add_argument("--device-id", required=True, help="Unique device ID (matches what the firmware publishes to sensors/<device_id>/data)")
     parser.add_argument("--name", default=None, help="Human-readable device name")
     parser.add_argument("--description", default=None, help="Optional description")
+    parser.add_argument(
+        "--offset", type=float, default=0.0,
+        help="Calibration offset: weight = (raw_value + offset) * gain (default: 0.0, i.e. not calibrated yet)"
+    )
+    parser.add_argument(
+        "--gain", type=float, default=1.0,
+        help="Calibration gain: weight = (raw_value + offset) * gain (default: 1.0, i.e. not calibrated yet)"
+    )
     parser.add_argument("--api-url", default="http://localhost:8000", help="Web API base URL (default: http://localhost:8000)")
     parser.add_argument("--admin-username", required=True, help="Admin username to authenticate with")
     parser.add_argument("--admin-password", default=None, help="Admin password (omit to be prompted)")
 
     args = parser.parse_args()
+
+    if args.gain == 0:
+        parser.error("--gain must not be zero")
 
     password = args.admin_password or getpass.getpass("Admin password: ")
 
@@ -105,12 +119,15 @@ Examples:
         "device_id": args.device_id,
         "name": args.name,
         "description": args.description,
+        "offset": args.offset,
+        "gain": args.gain,
     }, token=token)
 
     pairing_payload = f"verolic://pair?device_id={device['device_id']}&secret={device['pairing_secret']}"
 
     print("\n" + "-" * 60)
     print(f"✓ Device created: {device['device_id']}")
+    print(f"  Calibration:    offset={device['offset']}, gain={device['gain']}")
     print(f"  Pairing secret: {device['pairing_secret']}")
     print(f"  QR payload:     {pairing_payload}")
     print("-" * 60)

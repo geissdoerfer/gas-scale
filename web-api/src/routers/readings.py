@@ -11,6 +11,8 @@ from src.database import get_db
 from src.dependencies import get_current_user, check_device_access
 from src import models
 from src import schemas
+from src.calibration import reading_to_dict
+from src.cylinder_specs import LOW_BATTERY_VOLTAGE
 
 router = APIRouter(tags=["Sensor Readings"])
 
@@ -39,19 +41,7 @@ def get_latest_reading(
     offset = device.offset if device else 0.0
     gain = device.gain if device else 1.0
 
-    # Calculate calibrated weight
-    weight = None
-    if reading.raw_value is not None:
-        weight = (reading.raw_value + offset) * gain
-
-    return {
-        "time": reading.time,
-        "device_id": reading.device_id,
-        "raw_value": reading.raw_value,
-        "weight": weight,
-        "battery_voltage": reading.battery_voltage,
-        "temperature": reading.temperature
-    }
+    return reading_to_dict(reading, offset, gain)
 
 
 @router.get("/devices/{device_id}/readings", response_model=schemas.SensorReadingList)
@@ -85,20 +75,7 @@ def get_readings(
     ).order_by(desc(models.SensorReading.time)).limit(limit).all()
 
     # Apply calibration to each reading
-    calibrated_readings = []
-    for reading in readings:
-        weight = None
-        if reading.raw_value is not None:
-            weight = (reading.raw_value + offset) * gain
-
-        calibrated_readings.append({
-            "time": reading.time,
-            "device_id": reading.device_id,
-            "raw_value": reading.raw_value,
-            "weight": weight,
-            "battery_voltage": reading.battery_voltage,
-            "temperature": reading.temperature
-        })
+    calibrated_readings = [reading_to_dict(reading, offset, gain) for reading in readings]
 
     return {
         "device_id": device_id,
@@ -138,20 +115,7 @@ def get_dashboard(
         ).order_by(desc(models.SensorReading.time)).first()
 
         # Apply calibration to latest reading if it exists
-        latest_reading_dict = None
-        if latest:
-            weight = None
-            if latest.raw_value is not None:
-                weight = (latest.raw_value + device.offset) * device.gain
-
-            latest_reading_dict = {
-                "time": latest.time,
-                "device_id": latest.device_id,
-                "raw_value": latest.raw_value,
-                "weight": weight,
-                "battery_voltage": latest.battery_voltage,
-                "temperature": latest.temperature
-            }
+        latest_reading_dict = reading_to_dict(latest, device.offset, device.gain) if latest else None
 
         # Determine status
         status_value = "no_data"
@@ -159,7 +123,7 @@ def get_dashboard(
             time_diff = datetime.utcnow() - latest.time.replace(tzinfo=None)
             if time_diff > timedelta(hours=24):
                 status_value = "no_data"
-            elif latest.battery_voltage and latest.battery_voltage < 11.5:
+            elif latest.battery_voltage and latest.battery_voltage < LOW_BATTERY_VOLTAGE:
                 status_value = "low_battery"
             else:
                 status_value = "ok"

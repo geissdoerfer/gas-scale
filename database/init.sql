@@ -25,8 +25,11 @@ CREATE TABLE devices (
     device_id VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(100),
     description TEXT,
-    "offset" FLOAT DEFAULT -256620.0 NOT NULL,
-    gain FLOAT DEFAULT -0.09121 NOT NULL,
+    -- No real calibration until an admin sets it (device creation UI / register_device.py
+    -- --offset/--gain, or PATCH /devices/{device_id}/calibration). 0.0/1.0 means
+    -- weight = raw_value unchanged, i.e. "not calibrated yet", not a real device's fit.
+    "offset" FLOAT DEFAULT 0.0 NOT NULL,
+    gain FLOAT DEFAULT 1.0 NOT NULL,
     -- DB-level default as a safety net for any insert path that doesn't set this column
     -- explicitly; see database/migrations/002_*.sql.
     pairing_secret VARCHAR(64) DEFAULT md5(random()::text || clock_timestamp()::text) NOT NULL,

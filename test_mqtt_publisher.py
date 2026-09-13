@@ -28,7 +28,7 @@ except ImportError:
 class SensorDataGenerator:
     """Generates realistic sensor data with some variation"""
 
-    def __init__(self, base_val=1500.0, base_voltage=12.6, base_temp=23.0):
+    def __init__(self, base_val=14.0, base_voltage=3.7, base_temp=23.0):
         self.base_val = base_val
         self.base_voltage = base_voltage
         self.base_temp = base_temp
@@ -40,29 +40,29 @@ class SensorDataGenerator:
     def generate(self):
         """Generate a reading with realistic variations"""
         # Add random walk to trends
-        self.val_trend += random.uniform(-10.0, 10.0)
-        self.val_trend = max(-200.0, min(200.0, self.val_trend))  # Limit trend
+        self.val_trend += random.uniform(-1.1, 1.1)
+        self.val_trend = max(0.0, min(12.0, self.val_trend))  # Limit trend
 
         self.voltage_trend += random.uniform(-0.02, 0.02)
-        self.voltage_trend = max(-0.5, min(0.5, self.voltage_trend))
+        self.voltage_trend = max(-0, min(0.5, self.voltage_trend))
 
         self.temp_trend += random.uniform(-0.1, 0.1)
         self.temp_trend = max(-2.0, min(2.0, self.temp_trend))
 
         # Generate values with noise
-        val = self.base_val + self.val_trend + random.uniform(-50.0, 50.0)
+        val = self.base_val + self.val_trend + random.uniform(-0.5, 0.5)
         voltage = self.base_voltage + self.voltage_trend + random.uniform(-0.1, 0.1)
         temp = self.base_temp + self.temp_trend + random.uniform(-0.5, 0.5)
 
         # Ensure realistic bounds
-        val = max(0.0, min(5000.0, val))  # raw HX711 reading (arbitrary test scale)
-        voltage = max(10.0, min(14.0, voltage))
+        val = max(0.0, min(100.0, val))  # raw HX711 reading (arbitrary test scale)
+        voltage = max(3.0, min(4.3, voltage))
         temp = max(-10.0, min(50.0, temp))
 
         self.cnt += 1
 
         return {
-            "val": round(val),
+            "val": round(val, 3),
             "temp": round(temp, 3),
             "bat": round(voltage, 3),
             "cnt": self.cnt,
@@ -82,7 +82,18 @@ def on_publish(client, userdata, mid, reason_codes=None, properties=None):
     userdata["publish_count"] += 1
 
 
-def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode, username=None, password=None, tls=False):
+def publish_data(
+    device_id,
+    rate,
+    duration,
+    broker,
+    port,
+    topic_prefix,
+    mode,
+    username=None,
+    password=None,
+    tls=False,
+):
     """
     Publish sensor data at specified rate
 
@@ -178,7 +189,7 @@ def publish_data(device_id, rate, duration, broker, port, topic_prefix, mode, us
             if result.rc == mqtt.MQTT_ERR_SUCCESS:
                 message_count += 1
                 print(
-                    f"[{message_count:4d}] Published: val={data['val']:5d}  "
+                    f"[{message_count:4d}] Published: val={data['val']:5.2f}  "
                     f"bat={data['bat']:5.2f}V  "
                     f"temp={data['temp']:5.2f}°C  "
                     f"cnt={data['cnt']}"

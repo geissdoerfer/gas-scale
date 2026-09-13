@@ -1,7 +1,7 @@
 """
 Pydantic schemas for request/response validation.
 """
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -61,6 +61,13 @@ class DeviceCreate(DeviceBase):
     offset: float = 0.0
     gain: float = 1.0
 
+    @field_validator("gain")
+    @classmethod
+    def gain_must_be_nonzero(cls, v: float) -> float:
+        if v == 0:
+            raise ValueError("gain must not be zero")
+        return v
+
 
 class DeviceUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
@@ -71,7 +78,17 @@ class DeviceUpdate(BaseModel):
 
 class DeviceCalibration(BaseModel):
     offset: float = Field(..., description="Calibration offset value")
-    gain: float = Field(..., gt=0, description="Calibration gain/scale factor (must be > 0)")
+    # Not gt=0: a load cell/HX711 wiring can legitimately produce a negative-going raw
+    # value as weight increases, requiring a negative gain to invert it. Only zero (which
+    # would zero out every weight reading) is actually invalid.
+    gain: float = Field(..., description="Calibration gain/scale factor (must be non-zero)")
+
+    @field_validator("gain")
+    @classmethod
+    def gain_must_be_nonzero(cls, v: float) -> float:
+        if v == 0:
+            raise ValueError("gain must not be zero")
+        return v
 
 
 class DeviceResponse(DeviceBase):

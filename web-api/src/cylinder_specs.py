@@ -27,6 +27,9 @@ CYLINDER_SPECS: dict[str, CylinderSpec] = {
 BATTERY_VOLTAGE_EMPTY = 10.5
 BATTERY_VOLTAGE_FULL = 12.6
 
+# Below this, a device's status is reported as "low_battery" (devices.py, readings.py).
+LOW_BATTERY_VOLTAGE = 11.5
+
 
 def gas_percentage_remaining(weight_kg: float, cylinder_type: Optional[str]) -> Optional[int]:
     """Percentage of usable gas remaining, clamped to [0, 100]. None if type is unknown."""

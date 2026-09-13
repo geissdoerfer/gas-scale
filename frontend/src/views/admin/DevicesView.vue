@@ -24,6 +24,8 @@
               <th>Device ID</th>
               <th>Name</th>
               <th>Description</th>
+              <th>Offset</th>
+              <th>Gain</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -33,12 +35,15 @@
               <td>{{ device.device_id }}</td>
               <td>{{ device.name || 'N/A' }}</td>
               <td>{{ device.description || 'N/A' }}</td>
+              <td>{{ device.offset }}</td>
+              <td>{{ device.gain }}</td>
               <td>
                 <span :class="['device-status', getStatusClass(device)]">{{ getStatus(device) }}</span>
               </td>
               <td>
                 <button @click="assignDevice(device)" class="btn-icon" title="Assign to user">👤</button>
                 <button @click="editDevice(device)" class="btn-icon" title="Edit">✏️</button>
+                <button @click="calibrateDevice(device)" class="btn-icon" title="Calibration">🎚️</button>
                 <button @click="deleteDevice(device)" class="btn-icon" title="Delete">🗑️</button>
               </td>
             </tr>
@@ -68,10 +73,52 @@
             <textarea v-model="deviceForm.description" class="form-input" rows="3"></textarea>
           </div>
 
+          <div v-if="!editingDevice">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Calibration offset</label>
+                <input v-model.number="deviceForm.offset" type="number" step="any" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Calibration gain</label>
+                <input v-model.number="deviceForm.gain" type="number" step="any" class="form-input" />
+              </div>
+            </div>
+            <p class="field-hint">weight = (raw_value + offset) × gain. Leave at 0 / 1 if not calibrated yet — use the calibration action to set it later.</p>
+          </div>
+
           <div class="modal-actions">
             <button type="button" @click="closeModal" class="btn btn-secondary">Cancel</button>
             <button type="submit" class="btn btn-primary" :disabled="submitting">
               {{ submitting ? 'Saving...' : 'Save' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Calibration Modal -->
+    <div v-if="calibratingDevice" class="modal" @click.self="closeCalibrationModal">
+      <div class="modal-content">
+        <h3>Calibrate: {{ calibratingDevice.device_id }}</h3>
+        <p class="field-hint">weight = (raw_value + offset) × gain</p>
+
+        <form @submit.prevent="submitCalibration">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Offset</label>
+              <input v-model.number="calibrationForm.offset" type="number" step="any" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gain</label>
+              <input v-model.number="calibrationForm.gain" type="number" step="any" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" @click="closeCalibrationModal" class="btn btn-secondary">Cancel</button>
+            <button type="submit" class="btn btn-primary" :disabled="calibrating">
+              {{ calibrating ? 'Saving...' : 'Save' }}
             </button>
           </div>
         </form>
@@ -155,13 +202,22 @@ const error = ref('')
 const showCreateModal = ref(false)
 const editingDevice = ref(null)
 const assigningDevice = ref(null)
+const calibratingDevice = ref(null)
 const submitting = ref(false)
+const calibrating = ref(false)
 const pairingResult = ref(null)
 
 const deviceForm = ref({
   device_id: '',
   name: '',
   description: '',
+  offset: 0,
+  gain: 1,
+})
+
+const calibrationForm = ref({
+  offset: 0,
+  gain: 1,
 })
 
 const fetchDevices = async () => {
@@ -229,6 +285,38 @@ const assignDevice = async (device) => {
   await fetchUsers()
 }
 
+const calibrateDevice = (device) => {
+  calibratingDevice.value = device
+  calibrationForm.value = { offset: device.offset, gain: device.gain }
+}
+
+const closeCalibrationModal = () => {
+  calibratingDevice.value = null
+}
+
+const submitCalibration = async () => {
+  if (calibrationForm.value.gain === 0) {
+    error.value = 'Gain must not be zero'
+    return
+  }
+
+  calibrating.value = true
+  error.value = ''
+
+  try {
+    await devicesAPI.calibrate(calibratingDevice.value.device_id, {
+      offset: calibrationForm.value.offset,
+      gain: calibrationForm.value.gain,
+    })
+    closeCalibrationModal()
+    await fetchDevices()
+  } catch (err) {
+    error.value = err.response?.data?.detail || 'Failed to save calibration'
+  } finally {
+    calibrating.value = false
+  }
+}
+
 const assignToUser = async (userId) => {
   try {
     await devicesAPI.assign(assigningDevice.value.device_id, userId)
@@ -240,6 +328,11 @@ const assignToUser = async (userId) => {
 }
 
 const submitDevice = async () => {
+  if (!editingDevice.value && deviceForm.value.gain === 0) {
+    error.value = 'Gain must not be zero'
+    return
+  }
+
   submitting.value = true
   error.value = ''
 
@@ -293,6 +386,8 @@ const closeModal = () => {
     device_id: '',
     name: '',
     description: '',
+    offset: 0,
+    gain: 1,
   }
 }
 
@@ -473,6 +568,21 @@ onMounted(() => {
 textarea.form-input {
   resize: vertical;
   font-family: inherit;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.field-hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin: -8px 0 16px 0;
 }
 
 .pairing-warning {
