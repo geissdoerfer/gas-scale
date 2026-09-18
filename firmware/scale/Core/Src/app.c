@@ -12,8 +12,11 @@
 #include "stm32u0xx_hal.h"
 #include "usart.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+
+#define DEBUG 1
 
 void SystemClock_Config(void);
 
@@ -33,6 +36,33 @@ void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc) {
 int __io_putchar(int ch) {
   HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
   return ch;
+}
+
+// Send AT and wait for OK, retrying a few times to wake up the module
+static bool WakeupModule(void) {
+  for (unsigned int i = 0; i < 3; i++) {
+    if (AT_SendCommand("AT\r\n", "OK", 2000))
+      return true;
+    printf("Didn't receive OK from module (%u)\r\n", i);
+  }
+  return false;
+}
+
+// Format the sensor data into a JSON message
+static void FormatMessage(char *buf, size_t buf_size, int value,
+                          float battery_voltage) {
+  snprintf(buf, buf_size, "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}",
+           value, 23.5, battery_voltage, Radio_GetInitCount());
+}
+
+// Connect to the MQTT broker, retrying a few times on failure
+static bool ConnectToBroker(void) {
+  for (unsigned int i = 0; i < 3; i++) {
+    if (MQTT_Connect())
+      return true;
+    printf("MQTT connect failed (%u)\r\n", i);
+  }
+  return false;
 }
 
 /**
@@ -70,6 +100,7 @@ int main(void) {
 
   // Initialize radio module
   Radio_Init();
+  MQTT_Init();
 
   while (1) {
     /* USER CODE END WHILE */
@@ -96,13 +127,15 @@ int main(void) {
 
       // Wake up the cellular module
       printf("Trying to wakeup module\r\n");
-      for (unsigned int i = 0; i < 3; i++) {
-        if (AT_SendCommand("AT\r\n", "OK", 2000))
-          break;
-        else {
-          printf("Didn't receive OK from module\r\n");
-        }
+
+      if (!WakeupModule()) {
+        HX711_PowerDown();
+        Radio_Init();
+        MQTT_Init();
+        HAL_Delay(5000);
+        continue;
       }
+
       // Turn on LED during sensor read and transmission
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
 
@@ -110,30 +143,26 @@ int main(void) {
       int value = HX711_ReadAverage(HX711_GAIN_64, 32);
       HX711_PowerDown();
 
-      // Format the sensor data into a JSON message
+      if (!ConnectToBroker())
+        continue;
+
+      HAL_Delay(500);
+
       char message[128];
-      snprintf(message, sizeof(message),
-               "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}", value,
-               23.5, battery_voltage, Radio_GetInitCount());
+      FormatMessage(message, sizeof(message), value, battery_voltage);
 
-      if (MQTT_Connect()) {
+      // Publish sensor data
+      if (MQTT_Publish("sensors/c0ffee02/data", message)) {
         HAL_Delay(500);
-
-        // Publish sensor data
-        if (MQTT_Publish("sensors/c0ffee00/data", message)) {
-          HAL_Delay(500);
-          printf("Published weight: %d\r\n", value);
-        } else {
-          printf("MQTT publish failed\r\n");
-        }
-
-        // Disconnect from MQTT
-        MQTT_Disconnect();
+        printf("Published weight: %d\r\n", value);
       } else {
-        printf("Reinitializing radio due to MQTT failure...\r\n");
-        Radio_Init();
+        printf("MQTT publish failed\r\n");
       }
+
+      // Disconnect from MQTT
+      MQTT_Disconnect();
     }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */

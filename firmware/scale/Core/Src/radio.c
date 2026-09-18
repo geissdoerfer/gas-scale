@@ -22,6 +22,19 @@ static bool has_lte_service(void) {
   return false;
 }
 
+// Upload the CA certificate needed for the MQTT TLS connection
+static bool UploadCertificate(void) {
+  AT_SendCommand("AT\r\n", "OK", 2000);
+  HAL_Delay(60000);
+  if (CertUpload_UploadISRGRootX1()) {
+    printf("Certificate uploaded successfully!\r\n");
+    return true;
+  } else {
+    printf("Certificate upload failed!\r\n");
+    return false;
+  }
+}
+
 bool Radio_Init(void) {
   radio_init_count++;
   printf("Initializing radio module (count: %lu)...\r\n", radio_init_count);
@@ -53,15 +66,8 @@ bool Radio_Init(void) {
   HAL_Delay(1000);
   AT_SendCommand("AT\r\n", "OK", 2000);
 
-#if 0
-  AT_SendCommand("AT\r\n", "OK", 2000);
-  HAL_Delay(30000);
-  if (CertUpload_UploadISRGRootX1()) {
-    printf("Certificate uploaded successfully!\r\n");
-  } else {
-    printf("Certificate upload failed!\r\n");
-  }
-#endif
+  // UploadCertificate();
+
   AT_SendCommand("AT+CGDCONT=1,\"IP\",\"hologram\"\r\n", "OK", 2000);
 
   // Wait for LTE service
@@ -77,24 +83,6 @@ bool Radio_Init(void) {
     }
   }
   printf("Service info: %s\r\n", AT_GetLastResponse());
-
-  MQTT_Config_t config = {
-      .broker_url =
-          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
-      .client_id = "ClientID",
-      .username = "nessie",
-      .password = "D-sub729",
-      .keepalive = 60,
-      .ca_cert = "isrgrootx1.pem"};
-
-  AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
-  HAL_Delay(2000);
-  AT_SendCommand("AT+CCLK?\r\n", NULL, 0);
-
-  if (!MQTT_Init(&config)) {
-    printf("MQTT initialization failed\r\n");
-    return false;
-  }
 
   printf("Radio initialization complete\r\n");
   return true;

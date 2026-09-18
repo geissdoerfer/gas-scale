@@ -20,13 +20,25 @@ static bool mqtt_connected = false;
 /**
  * @brief Initialize MQTT service and configure SSL
  */
-bool MQTT_Init(const MQTT_Config_t *config) {
+bool MQTT_Init(void) {
   printf("Initializing MQTT...\r\n");
 
   // Store configuration
-  memcpy(&current_config, config, sizeof(MQTT_Config_t));
+  current_config = (MQTT_Config_t){
+      .broker_url =
+          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
+      .client_id = "ClientID",
+      .username = "nessie",
+      .password = "D-sub729",
+      .keepalive = 60,
+      .ca_cert = "isrgrootx1.pem"};
 
-  // Configure SSL BEFORE starting MQTT service if enabled
+  // Sync module clock (needed for TLS certificate validation)
+  AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
+  HAL_Delay(2000);
+  AT_SendCommand("AT+CCLK?\r\n", NULL, 0);
+
+  // Configure SSL BEFORE starting MQTT service
   char cmd[128];
 
   // Set SSL version (4 = all versions: SSL3.0, TLS1.0, TLS1.1, TLS1.2)
@@ -46,9 +58,9 @@ bool MQTT_Init(const MQTT_Config_t *config) {
   HAL_Delay(500);
 
   // Set CA certificate
-  if (config->ca_cert) {
+  if (current_config.ca_cert) {
     snprintf(cmd, sizeof(cmd), "AT+CSSLCFG=\"cacert\",0,\"%s\"\r\n",
-             config->ca_cert);
+             current_config.ca_cert);
     if (!AT_SendCommand(cmd, "OK", 2000)) {
       printf("Failed to set CA cert\r\n");
       return false;
@@ -87,14 +99,18 @@ bool MQTT_Connect(void) {
     return false;
   }
 
+  HAL_Delay(1000);
+
   // Acquire MQTT client (index 0, with or without SSL)
   snprintf(cmd, sizeof(cmd), "AT+CMQTTACCQ=0,\"%s\",1\r\n", "ClientID");
-  printf("\r\nAcquiring MQTT client...\r\n");
-  if (!AT_SendCommand(cmd, "OK", 5000)) {
+  if (!AT_SendCommand(cmd, "OK", 2000)) {
     printf("Failed to acquire MQTT client\r\n");
+    HAL_Delay(2000);
+    if (!AT_SendCommand("AT+CMQTTREL=0\r\n", "OK", 2000)) {
+      printf("Failed to release MQTT client\r\n");
+    }
     return false;
   }
-
   HAL_Delay(500);
 
   // Set SSL context for MQTT (after acquiring client)
@@ -124,11 +140,15 @@ bool MQTT_Connect(void) {
 
   if (!AT_SendCommand(cmd, "OK", 5000)) {
     printf("Failed to connect to MQTT broker\r\n");
+    HAL_Delay(2000);
+    if (!AT_SendCommand("AT+CMQTTREL=0\r\n", "OK", 2000)) {
+      printf("Failed to release MQTT client\r\n");
+    }
     return false;
   }
 
-  mqtt_connected = true;
   printf("Connected to MQTT broker\r\n");
+  mqtt_connected = true;
   return true;
 }
 
@@ -180,53 +200,4 @@ bool MQTT_Disconnect(void) {
   mqtt_connected = false;
   printf("Disconnected from MQTT broker\r\n");
   return true;
-}
-
-/**
- * @brief Upload string to MQTT server (convenience function)
- */
-bool MQTT_UploadString(const char *broker_url, const char *client_id,
-                       const char *username, const char *password,
-                       const char *topic, const char *message,
-                       const char *ca_cert) {
-  bool success = false;
-
-  printf("=== MQTT Upload String ===\r\n");
-  printf("Broker: %s\r\n", broker_url);
-  printf("Topic: %s\r\n", topic);
-  printf("Message length: %d bytes\r\n", strlen(message));
-
-  // Configure MQTT
-  MQTT_Config_t config = {.broker_url = broker_url,
-                          .client_id = client_id,
-                          .username = username,
-                          .password = password,
-                          .keepalive = 60,
-                          .ca_cert = ca_cert};
-
-  // Initialize
-  if (!MQTT_Init(&config)) {
-    printf("MQTT init failed\r\n");
-    goto cleanup;
-  }
-
-  // Connect
-  if (!MQTT_Connect()) {
-    printf("MQTT connect failed\r\n");
-    goto cleanup;
-  }
-
-  // Publish
-  if (!MQTT_Publish(topic, message)) {
-    printf("MQTT publish failed\r\n");
-    goto cleanup;
-  }
-
-  success = true;
-  printf("=== Upload Successful ===\r\n");
-
-cleanup:
-  // Always try to disconnect
-  MQTT_Disconnect();
-  return success;
 }

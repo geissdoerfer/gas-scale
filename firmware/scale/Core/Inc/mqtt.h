@@ -29,10 +29,9 @@ typedef struct {
 
 /**
  * @brief Initialize MQTT service and configure SSL
- * @param config MQTT configuration
  * @return true if successful, false otherwise
  */
-bool MQTT_Init(const MQTT_Config_t *config);
+bool MQTT_Init(void);
 
 /**
  * @brief Connect to MQTT broker
@@ -53,6 +52,18 @@ bool MQTT_Publish(const char *topic, const char *message);
  * @return true if disconnected, false otherwise
  */
 bool MQTT_Disconnect(void);
+
+/**
+ * @brief Acquire the MQTT client
+ * @return true if acquired, false otherwise
+ */
+bool MQTT_Acquire(void);
+
+/**
+ * @brief Release the MQTT client
+ * @return true if released, false otherwise
+ */
+bool MQTT_Release(void);
 
 /**
  * @brief Upload string to MQTT server (convenience function)
