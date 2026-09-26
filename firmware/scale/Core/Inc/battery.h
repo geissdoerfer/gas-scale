@@ -20,6 +20,13 @@ extern "C" {
 float Battery_ReadVoltage(void);
 
 /**
+ * @brief Read bus voltage using ADC
+ * @note Reads ADC1_IN18 (PB1); no sense-enable circuit to toggle
+ * @retval Bus voltage in volts, or 0.0 if read failed
+ */
+float Battery_BusVoltage(void);
+
+/**
  * @brief Block until the battery voltage reaches a usable level
  * @note Repeatedly enters STOP2 mode between voltage checks
  * @param min_voltage Minimum battery voltage required, in volts
