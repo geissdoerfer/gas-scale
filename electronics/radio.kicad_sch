@@ -8175,6 +8175,17 @@
 				)
 			)
 		)
+		(property "MPN" "TPSB107K006R0250"
+			(at 77.47 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "7e8cd339-bb88-46fc-94d6-b425cdd6419c")
 		)
@@ -9575,6 +9586,17 @@
 				)
 			)
 		)
+		(property "MPN" "TPSB107K006R0250"
+			(at 66.04 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "6e53de09-efd5-4803-a90b-b034a45ff210")
 		)
@@ -9770,9 +9792,9 @@
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
-		(in_pos_files yes)
+		(in_pos_files no)
 		(dnp yes)
 		(fields_autoplaced yes)
 		(uuid "bb72b7f9-3f58-49b3-b3fa-35196c7e214a")
