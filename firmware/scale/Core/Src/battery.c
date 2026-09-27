@@ -2,7 +2,6 @@
 #include "adc.h"
 #include "main.h"
 #include "power.h"
-#include "rtc.h"
 #include "stm32u0xx_hal.h"
 #include <stdio.h>
 
@@ -98,8 +97,6 @@ void Battery_WaitUntilReady(float min_voltage) {
   float v_bat;
   while ((v_bat = Battery_ReadVoltage()) < min_voltage) {
     printf("Battery voltage low: %.2f\r\n", v_bat);
-    if (rtc_wakeup_flag)
-      rtc_wakeup_flag = 0; // Clear the software flag
     Power_EnterStop2Mode();
   }
 }

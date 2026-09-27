@@ -55,6 +55,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/mqtt.c
     Core/Src/power.c
     Core/Src/radio.c
+    Core/Src/sample_task.c
+    Core/Src/send_task.c
 )
 
 # Add include paths
