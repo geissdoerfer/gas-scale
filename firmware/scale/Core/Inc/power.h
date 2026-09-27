@@ -14,7 +14,8 @@ extern "C" {
 
 /**
  * @brief Configure and enter STOP2 low power mode
- * @note The MCU will wake up from RTC wakeup timer interrupt
+ * @note The MCU wakes up on any enabled interrupt (e.g. the RTC wakeup
+ *       timer, or the ChargerDetect_Pin EXTI line while it is armed)
  * @retval None
  */
 void Power_EnterStop2Mode(void);

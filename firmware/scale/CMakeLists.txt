@@ -49,6 +49,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Core/Src/at_commands.c
     Core/Src/battery.c
     Core/Src/bridge.c
+    Core/Src/device_config.c
     Core/Src/hx711.c
     Core/Src/cert_upload.c
     Core/Src/mqtt.c

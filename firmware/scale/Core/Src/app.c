@@ -2,6 +2,7 @@
 #include "at_commands.h"
 #include "battery.h"
 #include "bridge.h"
+#include "device_config.h"
 #include "gpio.h"
 #include "hx711.h"
 #include "main.h"
@@ -18,10 +19,15 @@
 
 #define DEBUG 1
 
+const char dev_name[] = "eagleXX";
+
 void SystemClock_Config(void);
 
 // Volatile flag to signal main loop that RTC wakeup occurred
 volatile uint8_t rtc_wakeup_flag = 0;
+
+// Volatile flag set when a rising edge is seen on ChargerDetect_Pin
+static volatile uint8_t charger_connect_flag = 0;
 
 /**
  * @brief RTC Wakeup Timer Event Callback
@@ -30,6 +36,16 @@ volatile uint8_t rtc_wakeup_flag = 0;
  */
 void HAL_RTCEx_WakeUpTimerEventCallback(RTC_HandleTypeDef *hrtc) {
   rtc_wakeup_flag = 1;
+}
+
+/**
+ * @brief GPIO EXTI Rising Edge Callback
+ * @param GPIO_Pin Pin that triggered the interrupt
+ * @retval None
+ */
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
+  if (GPIO_Pin == ChargerDetect_Pin)
+    charger_connect_flag = 1;
 }
 
 // Redirect printf to UART1 by implementing __io_putchar
@@ -53,6 +69,17 @@ static void FormatMessage(char *buf, size_t buf_size, int value,
                           float battery_voltage) {
   snprintf(buf, buf_size, "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}",
            value, 23.5, battery_voltage, Radio_GetInitCount());
+}
+
+// Block until a rising edge is seen on ChargerDetect_Pin (charger
+// connected), asleep in STOP2 mode until the EXTI interrupt wakes it.
+// The RTC wakeup timer must not be running yet, since it would otherwise
+// also wake the MCU periodically with nothing to check for.
+static void WaitForChargerFirstConnect(void) {
+  while (!charger_connect_flag) {
+    Power_EnterStop2Mode();
+  }
+  charger_connect_flag = 0;
 }
 
 // Connect to the MQTT broker, retrying a few times on failure
@@ -79,12 +106,24 @@ int main(void) {
   MX_ADC1_Init();
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
-  MX_RTC_Init();
 
   HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
 
   /* Allow time for a debug request */
   HAL_Delay(1000);
+
+  // On first start, wait for the charger to be connected once before
+  // proceeding, then permanently clear the first-start flag. RTC init is
+  // deferred until after this so STOP2 mode isn't also woken periodically
+  // by the RTC wakeup timer while we're only waiting for the charger EXTI.
+  if (DeviceConfig_IsFirstStart()) {
+    printf("First start: waiting for charger connection\r\n");
+    WaitForChargerFirstConnect();
+    DeviceConfig_ClearFirstStart();
+    printf("Charger detected, first start complete\r\n");
+  }
+
+  MX_RTC_Init();
 
   /* Don't power up if battery voltage is low */
   Battery_WaitUntilReady(4.1f);
@@ -152,7 +191,9 @@ int main(void) {
       FormatMessage(message, sizeof(message), value, battery_voltage);
 
       // Publish sensor data
-      if (MQTT_Publish("sensors/c0ffee02/data", message)) {
+      char topic[64];
+      snprintf(topic, sizeof(topic), "sensors/%s/data", dev_name);
+      if (MQTT_Publish(topic, message)) {
         HAL_Delay(500);
         printf("Published weight: %d\r\n", value);
       } else {

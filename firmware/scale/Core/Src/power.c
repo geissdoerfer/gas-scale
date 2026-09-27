@@ -13,7 +13,8 @@ void Power_EnterStop2Mode(void) {
 
   // Enter STOP2 mode
   // - Regulator in low-power mode
-  // - Wake up on RTC wakeup timer interrupt (EXTI line 20)
+  // - Wakes up on any enabled interrupt (RTC wakeup timer on EXTI line 20,
+  //   or ChargerDetect_Pin on EXTI line 1 while armed)
   HAL_PWREx_EnterSTOP2Mode(PWR_STOPENTRY_WFI);
 
   // --- MCU wakes up here when RTC interrupt fires ---
