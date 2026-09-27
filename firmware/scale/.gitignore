@@ -16,7 +16,12 @@ Core/Inc/gpio.h
 Core/Inc/main.h
 Core/Inc/stm32u0xx_hal_conf.h
 Core/Inc/stm32u0xx_it.h
+Core/Inc/FreeRTOSConfig.h
+Core/Inc/app_freertos.h
+Core/Src/app_freertos.c
+Core/Src/stm32u0xx_hal_timebase_tim.c
 Drivers/
+Middlewares/
 *.ld
 cmake/
 startup_stm32u083xx.s

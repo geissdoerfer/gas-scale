@@ -2,6 +2,7 @@
 #include "at_commands.h"
 #include "battery.h"
 #include "bridge.h"
+#include "cmsis_os2.h"
 #include "device_config.h"
 #include "gpio.h"
 #include "hx711.h"
@@ -82,6 +83,32 @@ static void WaitForChargerFirstConnect(void) {
   charger_connect_flag = 0;
 }
 
+// FreeRTOS bring-up: blinks the LED forever, independent of the existing
+// bare-metal loop in main(). Not started automatically; call
+// StartLedBlinkDemo() yourself (e.g. in place of the current int main(void)
+// body) to verify the RTOS port before migrating the rest of the
+// application into tasks.
+static void LedBlinkTask(void *argument) {
+  (void)argument;
+  for (;;) {
+    HAL_GPIO_TogglePin(Led_GPIO_Port, Led_Pin);
+    osDelay(500);
+  }
+}
+
+void StartLedBlinkDemo(void) {
+  osKernelInitialize();
+
+  const osThreadAttr_t led_blink_task_attributes = {
+      .name = "LedBlinkTask",
+      .priority = (osPriority_t)osPriorityNormal,
+      .stack_size = 128 * 4,
+  };
+  osThreadNew(LedBlinkTask, NULL, &led_blink_task_attributes);
+
+  osKernelStart();
+}
+
 // Connect to the MQTT broker, retrying a few times on failure
 static bool ConnectToBroker(void) {
   for (unsigned int i = 0; i < 3; i++) {
@@ -111,6 +138,7 @@ int main(void) {
 
   /* Allow time for a debug request */
   HAL_Delay(1000);
+  StartLedBlinkDemo();
 
   // On first start, wait for the charger to be connected once before
   // proceeding, then permanently clear the first-start flag. RTC init is
