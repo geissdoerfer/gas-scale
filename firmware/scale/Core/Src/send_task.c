@@ -1,12 +1,14 @@
 #include "send_task.h"
 #include "FreeRTOS.h"
 #include "at_commands.h"
+#include "bridge.h"
 #include "cmsis_os2.h"
 #include "main.h"
 #include "mqtt.h"
 #include "queue.h"
 #include "radio.h"
 #include "sample_task.h"
+#include "watchdog_task.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -77,17 +79,22 @@ static void SendTask(void *argument) {
   printf("Send task started\r\n");
 
   for (;;) {
+    osDelay(500);
     Radio_Sleep();
+    UART_Bridge_Process();
+    printf("Radio sleep mode activated\r\n");
     HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
-    osThreadFlagsWait(SEND_TASK_FLAG_PENDING, osFlagsWaitAny, osWaitForever);
+
+    osDelay(2 * 60 * 1000);
 
     printf("Trying to wakeup module\r\n");
     if (!WakeupModule()) {
       Radio_Init();
       MQTT_Init();
-      HAL_Delay(5000);
+      osDelay(5000);
       continue;
     }
+    osDelay(500);
     HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
 
     if (!ConnectToBroker()) {
@@ -95,16 +102,16 @@ static void SendTask(void *argument) {
       continue;
     }
 
-    HAL_Delay(500);
-
     Sample_t sample;
     while (xQueuePeek((QueueHandle_t)sample_queue, &sample, 0) == pdTRUE) {
+      osDelay(250);
       if (!PublishSample(&sample))
-        break;
+        continue;
 
       // Only remove the sample now that it's been sent successfully
       osMessageQueueGet(sample_queue, &sample, NULL, 0);
     }
+    Watchdog_ClearStaleCounter();
 
     MQTT_Disconnect();
   }

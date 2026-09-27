@@ -26,7 +26,7 @@ static void SampleTask(void *argument) {
   printf("Sample task started\r\n");
 
   for (;;) {
-    osThreadFlagsWait(SAMPLE_TASK_FLAG_RTC_TICK, osFlagsWaitAny, osWaitForever);
+    osDelay(1 * 30 * 1000);
 
     HX711_PowerUp();
     Sample_t sample = {
@@ -39,8 +39,6 @@ static void SampleTask(void *argument) {
            sample.battery_voltage, sample.sensor_value);
     if (osMessageQueuePut(sample_queue, &sample, 0, 0) != osOK) {
       printf("Sample queue full, dropping sample\r\n");
-    } else if (osMessageQueueGetCount(sample_queue) > SEND_BACKLOG_THRESHOLD) {
-      SendTask_NotifyPending();
     }
   }
 }

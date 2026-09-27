@@ -20,6 +20,8 @@ Core/Inc/FreeRTOSConfig.h
 Core/Inc/app_freertos.h
 Core/Src/app_freertos.c
 Core/Src/stm32u0xx_hal_timebase_tim.c
+Core/Inc/iwdg.h
+Core/Src/iwdg.c
 Drivers/
 Middlewares/
 *.ld
