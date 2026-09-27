@@ -18,7 +18,7 @@ extern "C" {
 typedef struct {
   float battery_voltage;
   int32_t sensor_value;
-  uint32_t timestamp; // HAL_GetTick() value at sample time, in ms
+  uint32_t timestamp; // osKernelGetTickCount() value at sample time, in ms
 } Sample_t;
 
 // Queue of Sample_t, filled by SampleTask on every RTC wakeup tick.

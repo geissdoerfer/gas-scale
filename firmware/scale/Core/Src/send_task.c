@@ -40,18 +40,22 @@ static bool ConnectToBroker(void) {
   return false;
 }
 
-// Format the sensor data into a JSON message
+// Format the sensor data into a JSON message. age_ms is how long ago
+// (relative to now, i.e. time of transmission) the sample was taken.
 static void FormatMessage(char *buf, size_t buf_size, int value,
-                          float battery_voltage) {
-  snprintf(buf, buf_size, "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu}",
-           value, 23.5, battery_voltage, Radio_GetInitCount());
+                          float battery_voltage, uint32_t age_ms) {
+  snprintf(buf, buf_size,
+           "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu,\"age_ms\":%lu}",
+           value, 23.5, battery_voltage, Radio_GetInitCount(), age_ms);
 }
 
 // Publish one sample over MQTT
 static bool PublishSample(const Sample_t *sample) {
+  uint32_t age_ms = osKernelGetTickCount() - sample->timestamp;
+
   char message[128];
   FormatMessage(message, sizeof(message), sample->sensor_value,
-                sample->battery_voltage);
+                sample->battery_voltage, age_ms);
 
   char topic[64];
   snprintf(topic, sizeof(topic), "sensors/%s/data", dev_name);

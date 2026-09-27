@@ -32,7 +32,7 @@ static void SampleTask(void *argument) {
     Sample_t sample = {
         .battery_voltage = Battery_ReadVoltage(),
         .sensor_value = HX711_ReadAverage(HX711_GAIN_64, 32),
-        .timestamp = HAL_GetTick(),
+        .timestamp = osKernelGetTickCount(),
     };
     HX711_PowerDown();
     printf("Sample taken(@%lu): %.3f %ld\r\n", sample.timestamp,
