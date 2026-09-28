@@ -35,13 +35,19 @@ static bool UploadCertificate(void) {
   }
 }
 
-bool Radio_Init(void) {
-  radio_init_count++;
-  printf("Initializing radio module (count: %lu)...\r\n", radio_init_count);
-
+void Radio_PowerOff(void) {
   HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_RESET);
-  HAL_Delay(1000);
+}
+
+void Radio_PowerOn(void) {
   HAL_GPIO_WritePin(RadioEnable_GPIO_Port, RadioEnable_Pin, GPIO_PIN_SET);
+}
+
+// Toggle power to the radio module and pulse its power key to (re)boot it
+static void Radio_Reset(void) {
+  Radio_PowerOff();
+  HAL_Delay(1000);
+  Radio_PowerOn();
   HAL_Delay(1000);
 
   // Clear any old data from the bridge buffer before starting
@@ -52,13 +58,28 @@ bool Radio_Init(void) {
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_SET);
   HAL_Delay(1500);
   HAL_GPIO_WritePin(RadioPwrKey_GPIO_Port, RadioPwrKey_Pin, GPIO_PIN_RESET);
+}
 
-  // Wait for module to be ready
-  printf("Waiting for *ATREADY...\r\n");
-  if (AT_WaitForResponse(20000, "*ATREADY")) {
-    printf("Module is ready!\r\n");
-  } else {
+bool Radio_Init(void) {
+  radio_init_count++;
+  printf("Initializing radio module (count: %lu)...\r\n", radio_init_count);
+
+  // Retry the reset + power-on sequence a few times in case the module
+  // doesn't come up cleanly on the first try
+  bool ready = false;
+  for (unsigned int attempt = 1; attempt <= 3; attempt++) {
+    Radio_Reset();
+
+    printf("Waiting for *ATREADY (attempt %u/3)...\r\n", attempt);
+    if (AT_WaitForResponse(20000, "*ATREADY")) {
+      printf("Module is ready!\r\n");
+      ready = true;
+      break;
+    }
     printf("Timeout waiting for *ATREADY\r\n");
+  }
+
+  if (!ready) {
     return false;
   }
 

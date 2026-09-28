@@ -3,9 +3,10 @@
 #include "hx711.h"
 #include "main.h"
 #include "send_task.h"
+#include "temperature.h"
 #include <stdio.h>
 
-#define SAMPLE_QUEUE_LENGTH 8
+#define SAMPLE_QUEUE_LENGTH 32
 #define SAMPLE_TASK_FLAG_RTC_TICK 0x01u
 
 // Once the backlog exceeds this many samples, SendTask is worth waking
@@ -31,12 +32,13 @@ static void SampleTask(void *argument) {
     HX711_PowerUp();
     Sample_t sample = {
         .battery_voltage = Battery_ReadVoltage(),
+        .temperature = Temperature_Read(),
         .sensor_value = HX711_ReadAverage(HX711_GAIN_64, 32),
         .timestamp = osKernelGetTickCount(),
     };
     HX711_PowerDown();
-    printf("Sample taken(@%lu): %.3f %ld\r\n", sample.timestamp,
-           sample.battery_voltage, sample.sensor_value);
+    printf("Sample taken(@%lu): %.3f %.3fC %ld\r\n", sample.timestamp,
+           sample.battery_voltage, sample.temperature, sample.sensor_value);
     if (osMessageQueuePut(sample_queue, &sample, 0, 0) != osOK) {
       printf("Sample queue full, dropping sample\r\n");
     }

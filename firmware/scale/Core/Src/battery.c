@@ -13,11 +13,16 @@ float Battery_ReadVoltage(void) {
   HAL_Delay(25); // Allow circuit to settle
 
   // Perform ADC conversion on PA0 (ADC_CHANNEL_4)
-  // The sequencer is a channel bitmask (needed for CHANNEL_18, see
-  // Battery_BusVoltage), so explicitly drop CHANNEL_18 to keep only one
-  // channel active at a time.
+  // With NbrOfConversion=1, ADC_SCAN_SEQ_FIXED converts whichever active
+  // channel has the lowest channel number, so every other channel sharing
+  // this ADC (CHANNEL_18, TEMPSENSOR) must be explicitly dropped first to
+  // keep only one channel active at a time.
   ADC_ChannelConfTypeDef sConfig = {0};
   sConfig.Channel = ADC_CHANNEL_18;
+  sConfig.Rank = ADC_RANK_NONE;
+  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = ADC_RANK_NONE;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 
@@ -59,9 +64,14 @@ float Battery_BusVoltage(void) {
   float bus_voltage = 0.0f;
 
   // Perform ADC conversion on PB1 (ADC_CHANNEL_18)
-  // Explicitly drop CHANNEL_4 first, see comment in Battery_ReadVoltage.
+  // Explicitly drop the other channels first, see comment in
+  // Battery_ReadVoltage.
   ADC_ChannelConfTypeDef sConfig = {0};
   sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Rank = ADC_RANK_NONE;
+  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
   sConfig.Rank = ADC_RANK_NONE;
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
 

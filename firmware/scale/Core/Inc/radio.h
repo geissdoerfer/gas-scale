@@ -16,6 +16,16 @@ extern "C" {
 #endif
 
 /**
+ * @brief Power off the cellular radio module (RadioEnable low)
+ */
+void Radio_PowerOff(void);
+
+/**
+ * @brief Power on the cellular radio module (RadioEnable high)
+ */
+void Radio_PowerOn(void);
+
+/**
  * @brief Initialize the cellular radio module
  * @note Powers on the module, waits for LTE service, and initializes MQTT
  * @retval true if initialization successful, false otherwise

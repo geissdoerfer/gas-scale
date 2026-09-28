@@ -13,6 +13,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#define SEND_PERIOD_SECONDS (2 * 60)
+
 // Defined in app.c; also used to build the MQTT topic
 extern const char dev_name[];
 
@@ -43,10 +45,11 @@ static bool ConnectToBroker(void) {
 // Format the sensor data into a JSON message. age_ms is how long ago
 // (relative to now, i.e. time of transmission) the sample was taken.
 static void FormatMessage(char *buf, size_t buf_size, int value,
-                          float battery_voltage, uint32_t age_ms) {
+                          float battery_voltage, float temperature,
+                          uint32_t age_ms) {
   snprintf(buf, buf_size,
            "{\"val\":%d,\"temp\":%.3f,\"bat\":%.3f,\"cnt\":%lu,\"age_ms\":%lu}",
-           value, 23.5, battery_voltage, Radio_GetInitCount(), age_ms);
+           value, temperature, battery_voltage, Radio_GetInitCount(), age_ms);
 }
 
 // Publish one sample over MQTT
@@ -55,7 +58,7 @@ static bool PublishSample(const Sample_t *sample) {
 
   char message[128];
   FormatMessage(message, sizeof(message), sample->sensor_value,
-                sample->battery_voltage, age_ms);
+                sample->battery_voltage, sample->temperature, age_ms);
 
   char topic[64];
   snprintf(topic, sizeof(topic), "sensors/%s/data", dev_name);
@@ -70,54 +73,79 @@ static bool PublishSample(const Sample_t *sample) {
   return true;
 }
 
-// Wakes the cellular module and connects once, then drains sample_queue
-// sample by sample: peek, publish, and only remove from the queue on a
-// successful publish. On any error, stops draining (without losing the
-// unsent sample) and waits for the next backlog notification.
+static bool DrainSampleQueue(void) {
+  Sample_t sample;
+  while (xQueuePeek((QueueHandle_t)sample_queue, &sample, 0) == pdTRUE) {
+    osDelay(250);
+    if (!PublishSample(&sample)) {
+      return false;
+    }
+    // Only remove the sample now that it's been sent successfully
+    osMessageQueueGet(sample_queue, &sample, NULL, 0);
+  }
+  return true;
+}
+
+// Wakes the cellular module and connects once, then drains sample_queue.
+// On any error, stops draining (without losing the unsent sample) and
+// waits for the next backlog notification.
 static void SendTask(void *argument) {
   (void)argument;
 
-  Radio_Init();
-  MQTT_Init();
-
   printf("Send task started\r\n");
-
-  for (;;) {
-    osDelay(500);
-    Radio_Sleep();
+  while (1) {
+    /* If Init fails, power off and wait 10 minutes */
+    if (!Radio_Init()) {
+      printf("Radio Init failed. Power off and restart in 10min\r\n");
+      Radio_PowerOff();
+      osDelay(2 * 60 * 1000);
+      continue;
+    }
+    osDelay(1000);
+    MQTT_Init();
+    osDelay(1000);
     UART_Bridge_Process();
-    printf("Radio sleep mode activated\r\n");
-    HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
 
-    osDelay(2 * 60 * 1000);
-
-    printf("Trying to wakeup module\r\n");
-    if (!WakeupModule()) {
-      Radio_Init();
-      MQTT_Init();
-      osDelay(5000);
-      continue;
-    }
-    osDelay(500);
-    HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
-
-    if (!ConnectToBroker()) {
+    for (;;) {
+      osDelay(500);
       Radio_Sleep();
-      continue;
+      UART_Bridge_Process();
+      printf("Radio sleep mode activated\r\n");
+      HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
+
+      osDelay(SEND_PERIOD_SECONDS * 1000);
+
+      printf("Trying to wakeup module\r\n");
+      if (!WakeupModule()) {
+        printf("Wakeup Radio failed. Power off and restart in 5min\r\n");
+
+        /* On failure power off and wait five minutes */
+        Radio_PowerOff();
+        osDelay(1 * 60 * 1000);
+        break;
+      }
+      osDelay(500);
+      HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_RESET);
+
+      if (!MQTT_Connect()) {
+        printf("MQTT Connect failed. Power off and restart in 5min\r\n");
+        /* On failure power off and wait five minutes */
+        Radio_PowerOff();
+        osDelay(1 * 60 * 1000);
+        break;
+      }
+
+      if (!DrainSampleQueue()) {
+        printf("Publish failed. Power off and restart in 5min\r\n");
+
+        /* On failure power off and wait five minutes */
+        Radio_PowerOff();
+        osDelay(1 * 60 * 1000);
+      }
+
+      Watchdog_ClearStaleCounter();
+      MQTT_Disconnect();
     }
-
-    Sample_t sample;
-    while (xQueuePeek((QueueHandle_t)sample_queue, &sample, 0) == pdTRUE) {
-      osDelay(250);
-      if (!PublishSample(&sample))
-        continue;
-
-      // Only remove the sample now that it's been sent successfully
-      osMessageQueueGet(sample_queue, &sample, NULL, 0);
-    }
-    Watchdog_ClearStaleCounter();
-
-    MQTT_Disconnect();
   }
 }
 

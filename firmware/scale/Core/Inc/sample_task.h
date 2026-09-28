@@ -17,6 +17,7 @@ extern "C" {
 
 typedef struct {
   float battery_voltage;
+  float temperature; // degrees Celsius, from the MCU's internal sensor
   int32_t sensor_value;
   uint32_t timestamp; // osKernelGetTickCount() value at sample time, in ms
 } Sample_t;
