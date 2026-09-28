@@ -103,3 +103,6 @@ frontend/.vite/
 # Backup files
 *~
 *.backup
+
+# Label generator output (contains device secrets, generated PDFs)
+labels/output/
