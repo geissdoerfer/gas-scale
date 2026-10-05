@@ -21,6 +21,10 @@ endif()
 # Set the project name
 set(CMAKE_PROJECT_NAME scale)
 
+# Build the one-shot hardware acceptance test firmware (test_main.c) instead
+# of the production app (app.c)
+option(BUILD_TEST_FIRMWARE "Build the hardware acceptance test firmware instead of the production app" OFF)
+
 # Enable compile command to ease indexing with e.g. clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
@@ -43,23 +47,37 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 )
 
 # Add sources to executable
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
-    Core/Src/app.c
-    Core/Src/at_commands.c
-    Core/Src/battery.c
-    Core/Src/bridge.c
-    Core/Src/device_config.c
-    Core/Src/hx711.c
-    Core/Src/cert_upload.c
-    Core/Src/mqtt.c
-    Core/Src/power.c
-    Core/Src/radio.c
-    Core/Src/sample_task.c
-    Core/Src/send_task.c
-    Core/Src/temperature.c
-    Core/Src/watchdog_task.c
-)
+if(BUILD_TEST_FIRMWARE)
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+        Core/Src/test_main.c
+        Core/Src/at_commands.c
+        Core/Src/battery.c
+        Core/Src/bridge.c
+        Core/Src/hx711.c
+        Core/Src/cert_upload.c
+        Core/Src/mqtt.c
+        Core/Src/radio.c
+        Core/Src/temperature.c
+    )
+else()
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE
+        # Add user sources here
+        Core/Src/app.c
+        Core/Src/at_commands.c
+        Core/Src/battery.c
+        Core/Src/bridge.c
+        Core/Src/device_config.c
+        Core/Src/hx711.c
+        Core/Src/cert_upload.c
+        Core/Src/mqtt.c
+        Core/Src/power.c
+        Core/Src/radio.c
+        Core/Src/sample_task.c
+        Core/Src/send_task.c
+        Core/Src/temperature.c
+        Core/Src/watchdog_task.c
+    )
+endif()
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
