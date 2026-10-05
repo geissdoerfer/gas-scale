@@ -1,7 +1,6 @@
 #include "send_task.h"
 #include "FreeRTOS.h"
 #include "at_commands.h"
-#include "bridge.h"
 #include "cmsis_os2.h"
 #include "main.h"
 #include "mqtt.h"
@@ -104,12 +103,10 @@ static void SendTask(void *argument) {
     osDelay(1000);
     MQTT_Init();
     osDelay(1000);
-    UART_Bridge_Process();
 
     for (;;) {
       osDelay(500);
       Radio_Sleep();
-      UART_Bridge_Process();
       printf("Radio sleep mode activated\r\n");
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
 

@@ -17,10 +17,21 @@ extern "C" {
 #include <stdint.h>
 
 void UART_Bridge_Init(void);
-void UART_Bridge_Process(void);
 
 /**
- * @brief Read byte from bridge buffer and forward to UART1
+ * @brief Start DebugTxTask
+ * @note Call once during FreeRTOS bring-up, before osKernelStart(). Debug
+ *       passthrough to UART1 won't actually run until this has been called,
+ *       even though UART_Bridge_Init() (called earlier, pre-kernel) already
+ *       starts buffering received bytes for it.
+ */
+void StartDebugTxTask(void);
+
+/**
+ * @brief Read byte from the bridge buffer
+ * @note UART1 debug passthrough happens autonomously via interrupts; this
+ *       only reads from the buffer AT_WaitForResponse() parses responses
+ *       from and no longer needs to be paired with any polling call.
  * @param byte Pointer to store the byte
  * @param timeout_ms Timeout in milliseconds
  * @return true if byte read, false on timeout

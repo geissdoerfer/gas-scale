@@ -33,6 +33,17 @@ bool AT_WaitForResponse(uint32_t timeout_ms, const char *expected) {
       if (idx < AT_RESPONSE_BUFFER_SIZE - 1) {
         response_buffer[idx++] = byte;
         response_buffer[idx] = '\0';
+      } else {
+        // Buffer full: slide the window forward by one byte instead of
+        // freezing on whatever came first. Without this, a long enough
+        // preamble before the expected text (e.g. verbose modem boot
+        // chatter) permanently starves out the match - the text can be
+        // seen arriving on the debug UART, yet AT_WaitForResponse times
+        // out anyway, since it stopped storing new bytes once full.
+        memmove(response_buffer, response_buffer + 1,
+                AT_RESPONSE_BUFFER_SIZE - 2);
+        response_buffer[AT_RESPONSE_BUFFER_SIZE - 2] = (char)byte;
+        response_buffer[AT_RESPONSE_BUFFER_SIZE - 1] = '\0';
       }
 
       // Check if we got the expected response

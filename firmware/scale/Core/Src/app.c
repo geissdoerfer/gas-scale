@@ -66,6 +66,13 @@ int main(void) {
 
   MX_GPIO_Init();
   MX_ADC1_Init();
+
+  // Compensate for this chip's internal ADC offset error. Must run once,
+  // with the ADC disabled (true here, since nothing has started a
+  // conversion yet), before any channel is ever read - otherwise every
+  // conversion on this ADC carries an uncalibrated, chip-specific offset.
+  HAL_ADCEx_Calibration_Start(&hadc1);
+
   MX_USART1_UART_Init();
   MX_USART3_UART_Init();
 
@@ -95,6 +102,7 @@ int main(void) {
 
   osKernelInitialize();
   printf("Kernel initialized\r\n");
+  StartDebugTxTask();
   StartSampleTask();
   StartSendTask();
 
