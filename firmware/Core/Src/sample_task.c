@@ -6,6 +6,8 @@
 #include "temperature.h"
 #include <stdio.h>
 
+#define SAMPLE_INTERVAL_MINUTES 1
+
 #define SAMPLE_QUEUE_LENGTH 32
 #define SAMPLE_TASK_FLAG_RTC_TICK 0x01u
 
@@ -20,16 +22,17 @@ static osThreadId_t sample_task_handle;
 static void SampleTask(void *argument) {
   (void)argument;
 
-  // Initialize HX711
-  HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_SET);
   HX711_Init();
 
   printf("Sample task started\r\n");
 
   for (;;) {
-    osDelay(1 * 30 * 1000);
+    osDelay(SAMPLE_INTERVAL_MINUTES * 60 * 1000);
 
+    HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_SET);
     HX711_PowerUp();
+    HAL_Delay(25); // Allow bridge excitation to settle
+
     Sample_t sample = {
         .battery_voltage = Battery_ReadVoltage(),
         .temperature = Temperature_Read(),
@@ -37,6 +40,7 @@ static void SampleTask(void *argument) {
         .timestamp = osKernelGetTickCount(),
     };
     HX711_PowerDown();
+    HAL_GPIO_WritePin(CellsEnable_GPIO_Port, CellsEnable_Pin, GPIO_PIN_RESET);
     printf("Sample taken(@%lu): %.3f %.3fC %ld\r\n", sample.timestamp,
            sample.battery_voltage, sample.temperature, sample.sensor_value);
     if (osMessageQueuePut(sample_queue, &sample, 0, 0) != osOK) {
