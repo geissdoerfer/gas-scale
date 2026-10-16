@@ -7,6 +7,7 @@
  */
 
 #include "hx711.h"
+#include "cmsis_os2.h"
 #include "main.h"
 #include "stm32u0xx_hal.h"
 
@@ -46,12 +47,16 @@ bool HX711_IsReady(void) {
 int32_t HX711_Read(HX711_Gain_t gain) {
   uint32_t data = 0;
 
-  // Wait for HX711 to be ready (DOUT goes low)
+  // Wait for HX711 to be ready (DOUT goes low). Yield instead of spinning
+  // tight - each conversion can take ~100ms (10SPS), and a plain busy-wait
+  // here pegs the CPU at full Run-mode current for that whole window,
+  // 32 times per sample, completely bypassing FreeRTOS tickless idle.
   uint32_t timeout = HAL_GetTick() + 1000;
   while (!HX711_IsReady()) {
     if (HAL_GetTick() > timeout) {
       return 0; // Timeout
     }
+    osDelay(1);
   }
 
   // Read 24 bits (MSB first)
