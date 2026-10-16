@@ -48,10 +48,14 @@ int __io_putchar(int ch) {
 // The RTC wakeup timer must not be running yet, since it would otherwise
 // also wake the MCU periodically with nothing to check for.
 static void WaitForChargerFirstConnect(void) {
+  // Reset before trusting the flag, not after: switching ChargerDetect_Pin
+  // into EXTI mode (in MX_GPIO_Init) can itself latch a spurious pending
+  // interrupt, which would otherwise make the loop below exit immediately
+  // on its first check, same as test_main.c's TestChargerGpio() does.
+  charger_connect_flag = 0;
   while (!charger_connect_flag) {
     Power_EnterStop2Mode();
   }
-  charger_connect_flag = 0;
 }
 
 /**
@@ -63,8 +67,10 @@ int main(void) {
   HAL_Init();
 
   SystemClock_Config();
-
   MX_GPIO_Init();
+  /* Allow time for a debug request */
+  HAL_Delay(3000);
+
   MX_ADC1_Init();
 
   // Compensate for this chip's internal ADC offset error. Must run once,
@@ -80,22 +86,18 @@ int main(void) {
 
   printf("Oh hello there!\r\n");
 
-  /* Allow time for a debug request */
-  HAL_Delay(1000);
-
   // On first start, wait for the charger to be connected once before
   // proceeding, then permanently clear the first-start flag. RTC init is
   // deferred until after this so STOP2 mode isn't also woken periodically
   // by the RTC wakeup timer while we're only waiting for the charger EXTI.
-  if (DeviceConfig_IsFirstStart()) {
+  bool first_start = DeviceConfig_IsFirstStart();
+  printf("DeviceConfig_IsFirstStart() = %d\r\n", (int)first_start);
+  if (first_start) {
     printf("First start: waiting for charger connection\r\n");
     WaitForChargerFirstConnect();
     DeviceConfig_ClearFirstStart();
     printf("Charger detected, first start complete\r\n");
   }
-
-  // Initialize UART bridge
-  UART_Bridge_Init();
 
   /* Don't power up if battery voltage is low */
   // Battery_WaitUntilReady(4.1f);

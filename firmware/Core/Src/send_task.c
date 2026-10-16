@@ -1,6 +1,7 @@
 #include "send_task.h"
 #include "FreeRTOS.h"
 #include "at_commands.h"
+#include "bridge.h"
 #include "cmsis_os2.h"
 #include "main.h"
 #include "mqtt.h"
@@ -90,6 +91,12 @@ static bool DrainSampleQueue(void) {
 // waits for the next backlog notification.
 static void SendTask(void *argument) {
   (void)argument;
+
+  // Arms USART3 RX for the modem link - only meaningful here, since this
+  // task is the only thing that drives the radio. Owning it here (same
+  // idea as SampleTask owning HX711_Init) means disabling this task also
+  // disables the bridge, instead of needing both toggled in sync by hand.
+  UART_Bridge_Init();
 
   printf("Send task started\r\n");
   while (1) {
