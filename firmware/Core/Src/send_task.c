@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SEND_PERIOD_SECONDS (2 * 60)
+#define SEND_PERIOD_SECONDS (10 * 60)
 
 // Defined in app.c; also used to build the MQTT topic
 extern const char dev_name[];
@@ -104,7 +104,7 @@ static void SendTask(void *argument) {
     if (!Radio_Init()) {
       printf("Radio Init failed. Power off and restart in 10min\r\n");
       Radio_PowerOff();
-      osDelay(2 * 60 * 1000);
+      osDelay(10 * 60 * 1000);
       continue;
     }
     osDelay(1000);
@@ -125,7 +125,7 @@ static void SendTask(void *argument) {
 
         /* On failure power off and wait five minutes */
         Radio_PowerOff();
-        osDelay(1 * 60 * 1000);
+        osDelay(5 * 60 * 1000);
         break;
       }
       osDelay(500);
@@ -135,7 +135,7 @@ static void SendTask(void *argument) {
         printf("MQTT Connect failed. Power off and restart in 5min\r\n");
         /* On failure power off and wait five minutes */
         Radio_PowerOff();
-        osDelay(1 * 60 * 1000);
+        osDelay(5 * 60 * 1000);
         break;
       }
 
@@ -144,7 +144,7 @@ static void SendTask(void *argument) {
 
         /* On failure power off and wait five minutes */
         Radio_PowerOff();
-        osDelay(1 * 60 * 1000);
+        osDelay(5 * 60 * 1000);
       }
 
       Watchdog_ClearStaleCounter();
