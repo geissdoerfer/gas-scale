@@ -16,15 +16,18 @@ extern "C" {
 
 /**
  * @brief Check whether the device has ever completed a first start
- * @note An erased flash cell reads as all 1s, so an unprogrammed device
- *       reads as "first start" with no explicit initialization needed
- * @retval true if this is the first start since the device was flashed
+ * @note Checks for a sentinel value the linker places at this address (see
+ *       device_config.c and the CONFIG region in the .ld script), so every
+ *       newly flashed image reads as "first start" again - no separate
+ *       flash erase needed to re-test it, only a reflash
+ * @retval true if this is the first start since the device was last flashed
  */
 bool DeviceConfig_IsFirstStart(void);
 
 /**
- * @brief Permanently clear the first-start flag
- * @note Only clears bits (no erase needed) since the flag starts erased
+ * @brief Permanently clear the first-start flag (until the next reflash)
+ * @note Only clears bits (no erase needed): writes all-zero, which flash
+ *       programming can always do regardless of the current value
  * @retval None
  */
 void DeviceConfig_ClearFirstStart(void);
