@@ -1,0 +1,56 @@
+---
+# Step 1: create a sudo-capable user with key-based SSH access. Root login
+# via password stays enabled until you have verified the new user works -
+# see 02-lock-root.yml. Firewall setup lives in firewall.yml, which runs as
+# the new user + sudo (so it keeps working once root login is disabled).
+#
+# This playbook requires root SSH login - only useful for bootstrapping a
+# fresh box. It is not meant to be re-run on this server once
+# 02-lock-root.yml has disabled root login.
+#
+# Run as:
+#   ansible-playbook 01-bootstrap.yml --ask-pass
+- name: Bootstrap non-root user
+  hosts: server
+  # A play's remote_user keyword is LOWER precedence than an inventory
+  # ansible_user variable (counter-intuitive, but documented Ansible
+  # behavior), so inventory.ini's group default (kai, since root login is
+  # disabled after 02-lock-root.yml) would silently win over remote_user
+  # here. Setting ansible_user as a play var instead actually overrides it.
+  vars:
+    ansible_user: root
+  gather_facts: true
+
+  tasks:
+    - name: Create {{ new_user }} with sudo group membership
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        shell: "{{ new_user_shell }}"
+        groups: sudo
+        append: true
+        create_home: true
+
+    - name: Create .ssh directory for {{ new_user }}
+      ansible.builtin.file:
+        path: "/home/{{ new_user }}/.ssh"
+        state: directory
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: "0700"
+
+    - name: Install authorized key for {{ new_user }}
+      ansible.builtin.copy:
+        content: "{{ lookup('file', ssh_pub_key_file) }}\n"
+        dest: "/home/{{ new_user }}/.ssh/authorized_keys"
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: "0600"
+
+    - name: Allow passwordless sudo for {{ new_user }}
+      ansible.builtin.copy:
+        content: "{{ new_user }} ALL=(ALL) NOPASSWD:ALL\n"
+        dest: "/etc/sudoers.d/90-{{ new_user }}"
+        owner: root
+        group: root
+        mode: "0440"
+        validate: "visudo -cf %s"

@@ -1,0 +1,220 @@
+---
+# Step 3: deploy HiveMQ (Enterprise) via Docker, separate from the
+# Mosquitto broker in ../docker-compose.yml.
+#
+# MQTT is served over TLS on 8883 (the A7670 module's built-in TLS talks to
+# this directly). There is no plaintext MQTT listener.
+#
+# MQTT auth: the image's bundled hivemq-allow-all-extension (enabled by
+# default - accepts any client, no credentials) is disabled, and the
+# Enterprise Security Extension is enabled instead with a single shared
+# MQTT username/password (full access to all topics). Credentials are read
+# from a local, untracked file (default: ../../hivemq_mqtt_credentials.txt,
+# username on line 1, password on line 2) and never written into any
+# committed file. Control Center auth is untouched (still default
+# admin/hivemq) - only the MQTT listener pipeline is wired to the
+# extension.
+#
+# Control Center (8080) is bound to localhost only on the remote host -
+# reach it with:
+#   ssh -L 8080:localhost:8080 kai@v2202610438770540225.happysrv.de
+# then browse http://localhost:8080
+# Default login is admin/hivemq until you change it in the UI - worth doing
+# once you've confirmed access, even though it's only reachable via tunnel.
+#
+# The TLS certificate comes from Let's Encrypt (HTTP-01, via the standalone
+# plugin on port 80). Renewals run automatically via the certbot.timer
+# systemd unit installed with the package; a deploy-hook script copies the
+# renewed cert/key into HiveMQ's volume and restarts the container.
+#
+# The HiveMQ license key is read from a local, untracked file (default:
+# ../../hivemq_key.txt, i.e. the repo root) and never written into any
+# committed file.
+#
+# Firewall: run firewall.yml first if you haven't already, to open 8883
+# and 80.
+#
+# Run as:
+#   ansible-playbook 03-hivemq.yml
+- name: Deploy HiveMQ via Docker
+  hosts: server
+  become: true
+  gather_facts: true
+
+  vars:
+    hivemq_dir: /opt/hivemq
+    hivemq_license_key_file: "{{ playbook_dir }}/../hivemq_key.txt"
+    hivemq_mqtt_credentials_file: "{{ playbook_dir }}/../hivemq_mqtt_credentials.txt"
+    certbot_deploy_hook: /etc/letsencrypt/renewal-hooks/deploy/hivemq-tls.sh
+
+  tasks:
+    - name: Install Docker prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+        state: present
+        update_cache: true
+
+    - name: Check whether Docker is already installed
+      ansible.builtin.command: docker --version
+      register: docker_version
+      failed_when: false
+      changed_when: false
+
+    - name: Install Docker via the official convenience script
+      ansible.builtin.shell: curl -fsSL https://get.docker.com | sh
+      when: docker_version.rc != 0
+
+    - name: Ensure Docker is enabled and running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Create HiveMQ deploy directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0750"
+      loop:
+        - "{{ hivemq_dir }}"
+        - "{{ hivemq_dir }}/conf"
+        - "{{ hivemq_dir }}/ese"
+
+    - name: Deploy HiveMQ docker-compose.yml
+      ansible.builtin.copy:
+        src: hivemq/docker-compose.yml
+        dest: "{{ hivemq_dir }}/docker-compose.yml"
+        mode: "0640"
+      notify: Restart HiveMQ
+
+    - name: Deploy HiveMQ config.xml
+      ansible.builtin.copy:
+        src: hivemq/config.xml
+        dest: "{{ hivemq_dir }}/conf/config.xml"
+        mode: "0640"
+      notify: Restart HiveMQ
+
+    - name: Deploy extension setup script
+      ansible.builtin.copy:
+        src: hivemq/extension-setup.sh
+        dest: "{{ hivemq_dir }}/extension-setup.sh"
+        mode: "0750"
+      notify: Restart HiveMQ
+
+    - name: Deploy Enterprise Security Extension pipeline config
+      ansible.builtin.copy:
+        src: hivemq/ese/config.xml
+        dest: "{{ hivemq_dir }}/ese/config.xml"
+        mode: "0640"
+      notify: Restart HiveMQ
+
+    - name: Read MQTT credentials from local file
+      ansible.builtin.set_fact:
+        hivemq_mqtt_username: "{{ lookup('file', hivemq_mqtt_credentials_file).splitlines()[0] | trim }}"
+        hivemq_mqtt_password: "{{ lookup('file', hivemq_mqtt_credentials_file).splitlines()[1] | trim }}"
+      no_log: true
+
+    - name: Deploy Enterprise Security Extension file-realm (MQTT credentials)
+      ansible.builtin.copy:
+        dest: "{{ hivemq_dir }}/ese/ese-file-realm.xml"
+        mode: "0640"
+        content: |
+          <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <ese-file-realm xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                          xsi:noNamespaceSchemaLocation="ese-file-realm.xsd">
+              <mqtt>
+                  <users>
+                      <user>
+                          <name>{{ hivemq_mqtt_username }}</name>
+                          <password>{{ hivemq_mqtt_password }}</password>
+                          <permissions>
+                              <permission>
+                                  <topic>#</topic>
+                                  <qos>ALL</qos>
+                                  <activity>ALL</activity>
+                                  <retain>ALL</retain>
+                                  <shared-subscription>ALL</shared-subscription>
+                              </permission>
+                          </permissions>
+                      </user>
+                  </users>
+              </mqtt>
+          </ese-file-realm>
+      no_log: true
+      notify: Restart HiveMQ
+
+    - name: Read HiveMQ license key from local file
+      ansible.builtin.set_fact:
+        hivemq_license_key: "{{ (lookup('file', hivemq_license_key_file).splitlines() | first) | trim }}"
+      no_log: true
+
+    - name: Write .env with license key
+      ansible.builtin.copy:
+        content: "HIVEMQ_LICENSE_KEY={{ hivemq_license_key }}\n"
+        dest: "{{ hivemq_dir }}/.env"
+        mode: "0600"
+      no_log: true
+
+    - name: Install certbot
+      ansible.builtin.apt:
+        name: certbot
+        state: present
+        update_cache: true
+
+    - name: Ensure certbot deploy-hook directory exists
+      ansible.builtin.file:
+        path: "{{ certbot_deploy_hook | dirname }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy certbot deploy-hook (syncs cert into HiveMQ's volume and restarts it)
+      ansible.builtin.copy:
+        dest: "{{ certbot_deploy_hook }}"
+        mode: "0750"
+        content: |
+          #!/bin/sh
+          set -e
+          LIVE_DIR="/etc/letsencrypt/live/{{ hivemq_domain }}"
+          TLS_DIR="{{ hivemq_dir }}/tls"
+
+          install -d -m 750 -o root -g root "${TLS_DIR}"
+          install -m 640 -o root -g root "${LIVE_DIR}/fullchain.pem" "${TLS_DIR}/fullchain.pem"
+          install -m 640 -o root -g root "${LIVE_DIR}/privkey.pem" "${TLS_DIR}/privkey.pem"
+
+          docker compose --project-directory "{{ hivemq_dir }}" restart hivemq
+
+    - name: Obtain TLS certificate via Let's Encrypt (first issuance only; renewals run via certbot.timer)
+      # --key-type rsa: certbot defaults to ECDSA, which chains to ISRG
+      # Root X2 - confirmed via openssl s_client against the issued cert.
+      # Embedded clients (e.g. the A7670 firmware) are commonly provisioned
+      # with only ISRG Root X1 (the classic RSA root) as a trusted CA, so
+      # forcing RSA here keeps the chain compatible with that.
+      ansible.builtin.command: >
+        certbot certonly --standalone --non-interactive --agree-tos
+        --key-type rsa
+        -m {{ letsencrypt_email }} -d {{ hivemq_domain }}
+      args:
+        creates: "/etc/letsencrypt/live/{{ hivemq_domain }}/fullchain.pem"
+      register: certbot_result
+
+    - name: Populate HiveMQ TLS directory from the new certificate
+      ansible.builtin.command: "{{ certbot_deploy_hook }}"
+      when: certbot_result is changed
+
+    - name: Ensure HiveMQ is running
+      ansible.builtin.command: docker compose up -d
+      args:
+        chdir: "{{ hivemq_dir }}"
+      register: hivemq_up
+
+    - name: Show docker compose output
+      ansible.builtin.debug:
+        var: hivemq_up.stdout_lines
+
+  handlers:
+    - name: Restart HiveMQ
+      ansible.builtin.command: docker compose restart hivemq
+      args:
+        chdir: "{{ hivemq_dir }}"

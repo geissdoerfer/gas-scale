@@ -106,3 +106,7 @@ frontend/.vite/
 
 # Label generator output (contains device secrets, generated PDFs)
 labels/output/
+
+# Secrets
+server/hivemq_key.txt
+server/hivemq_mqtt_credentials.txt

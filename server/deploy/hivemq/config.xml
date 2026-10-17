@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!--
+  Based on the config.xml shipped by default in the hivemq/hivemq4 Docker
+  image (inspected directly by running `cat /opt/hivemq/conf/config.xml`
+  inside the image). The plaintext tcp-listener on 1883 is
+  replaced with a tls-tcp-listener on 8883; everything else is left as
+  shipped, including the REST-API-CONFIGURATION placeholder comment, which
+  the image's entrypoint may template at container startup - do not remove
+  it.
+-->
+<hivemq xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="config.xsd">
+
+    <listeners>
+        <tls-tcp-listener>
+            <port>8883</port>
+            <bind-address>0.0.0.0</bind-address>
+            <name>mqtt-tls-listener</name>
+            <tls>
+                <keystore>
+                    <key-path>/opt/hivemq/tls/privkey.pem</key-path>
+                    <cert-path>/opt/hivemq/tls/fullchain.pem</cert-path>
+                </keystore>
+                <client-authentication-mode>NONE</client-authentication-mode>
+            </tls>
+        </tls-tcp-listener>
+        <websocket-listener>
+            <port>8000</port>
+            <bind-address>0.0.0.0</bind-address>
+            <path>/mqtt</path>
+            <name>my-websocket-listener</name>
+            <subprotocols>
+                <subprotocol>mqttv3.1</subprotocol>
+                <subprotocol>mqtt</subprotocol>
+            </subprotocols>
+            <allow-extensions>true</allow-extensions>
+        </websocket-listener>
+    </listeners>
+    <!--REST-API-CONFIGURATION-->
+
+    <control-center>
+        <listeners>
+            <http>
+                <port>8080</port>
+                <bind-address>0.0.0.0</bind-address>
+            </http>
+        </listeners>
+    </control-center>
+</hivemq>

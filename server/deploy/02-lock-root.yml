@@ -1,0 +1,52 @@
+---
+# Step 2: disable root and password SSH login.
+#
+# DO NOT run this until you have confirmed, in a separate terminal, that
+# you can log in as the new user with your key:
+#   ssh {{ new_user }}@v2202610438770540225.happysrv.de
+# and that sudo works there (e.g. `sudo true`).
+#
+# Run as:
+#   ansible-playbook 02-lock-root.yml -e root_access_confirmed=true
+- name: Disable root and password SSH login
+  hosts: server
+  remote_user: "{{ new_user }}"
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Refuse to continue unless login was verified
+      ansible.builtin.assert:
+        that: root_access_confirmed | default(false) | bool
+        fail_msg: >-
+          Refusing to disable root/password SSH login.
+          Verify you can SSH in as {{ new_user }} with your key and that
+          sudo works, then re-run with -e root_access_confirmed=true.
+        success_msg: "Login verified - proceeding to lock down SSH."
+
+    - name: Disable root login over SSH
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?\s*PermitRootLogin\b.*'
+        line: 'PermitRootLogin no'
+      notify: Restart sshd
+
+    - name: Disable password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?\s*PasswordAuthentication\b.*'
+        line: 'PasswordAuthentication no'
+      notify: Restart sshd
+
+    - name: Disable keyboard-interactive authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?\s*KbdInteractiveAuthentication\b.*'
+        line: 'KbdInteractiveAuthentication no'
+      notify: Restart sshd
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: ssh
+        state: restarted

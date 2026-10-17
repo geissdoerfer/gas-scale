@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Enterprise Security Extension config. Only wires up MQTT auth via the
+  file-realm (ese-file-realm.xml, generated at deploy time by Ansible - it
+  holds the actual credentials and is not committed). Deliberately omits
+  control-center-pipeline and rest-api-pipeline, so the Control Center
+  keeps using its own default login and the REST API (not enabled) is
+  unaffected.
+-->
+<enterprise-security-extension
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="config.xsd"
+        version="1">
+    <realms>
+        <file-realm>
+            <name>file-realm</name>
+            <enabled>true</enabled>
+            <configuration>
+                <file-path>conf/ese-file-realm.xml</file-path>
+            </configuration>
+        </file-realm>
+    </realms>
+    <pipelines>
+        <listener-pipeline listener="ALL">
+            <file-authentication-manager>
+                <realm>file-realm</realm>
+            </file-authentication-manager>
+            <file-authorization-manager>
+                <realm>file-realm</realm>
+            </file-authorization-manager>
+        </listener-pipeline>
+    </pipelines>
+</enterprise-security-extension>

@@ -1,0 +1,24 @@
+---
+new_user: kai
+new_user_shell: /bin/bash
+ssh_pub_key_file: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+
+hivemq_domain: mqtt.nessie-circuits.de
+letsencrypt_email: commerce@nessie-circuits.de
+
+# Note: postgres (5432) is intentionally NOT listed here - it must stay
+# unreachable from the internet. Control Center (8080) is also deliberately
+# excluded - it's bound to 127.0.0.1 on the host and reached via SSH tunnel.
+allowed_tcp_ports:
+  - 22    # SSH
+
+  # duoclean app stack (../docker-compose.yml) - not yet deployed to this
+  # host, reserved for when it is.
+  - 1883  # MQTT (Mosquitto, plaintext)
+  - 9001  # MQTT over WebSockets
+  - 8000  # web-api
+  - 3000  # frontend
+
+  # HiveMQ (deploy/hivemq) - separate/unrelated to the stack above.
+  - 8883  # MQTT over TLS
+  - 80    # Let's Encrypt HTTP-01 challenge (certbot standalone + renewals)

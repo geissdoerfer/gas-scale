@@ -1,0 +1,32 @@
+services:
+  hivemq:
+    image: hivemq/hivemq4:latest
+    container_name: hivemq
+    pull_policy: always
+    restart: unless-stopped
+    ports:
+      # Control Center: bound to loopback only. Reach it via an SSH tunnel:
+      #   ssh -L 8080:localhost:8080 kai@v2202610438770540225.happysrv.de
+      # Binding to 127.0.0.1 (rather than relying on ufw) is required here -
+      # Docker inserts its own iptables rules for published ports that can
+      # bypass ufw's filter rules, so "not opening it in ufw" alone would
+      # NOT reliably keep it off the public internet.
+      - "127.0.0.1:8080:8080"
+      - "8883:8883"
+    environment:
+      HIVEMQ_LICENSE_KEY: "${HIVEMQ_LICENSE_KEY}"
+      HIVEMQ_LOG_BASED_CLUSTERING_ENABLED: "true"
+    # Disables the allow-all extension and enables the Enterprise Security
+    # Extension before starting HiveMQ - see extension-setup.sh. Compose
+    # clears Cmd to null when entrypoint is overridden without also setting
+    # command, so command must be pinned explicitly here - otherwise the
+    # script's "$@" is empty and the real entrypoint exits immediately with
+    # nothing to run (confirmed: silent restart loop, exit 0, no logs).
+    entrypoint: ["/bin/sh", "/opt/hivemq-extension-setup.sh"]
+    command: ["/opt/hivemq/bin/run.sh"]
+    volumes:
+      - ./conf/config.xml:/opt/hivemq/conf/config.xml:ro
+      - ./tls:/opt/hivemq/tls:ro
+      - ./extension-setup.sh:/opt/hivemq-extension-setup.sh:ro
+      - ./ese/config.xml:/opt/hivemq/extensions/hivemq-enterprise-security-extension/conf/config.xml:ro
+      - ./ese/ese-file-realm.xml:/opt/hivemq/extensions/hivemq-enterprise-security-extension/conf/ese-file-realm.xml:ro
