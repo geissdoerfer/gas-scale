@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SEND_PERIOD_SECONDS (10 * 60)
+#define SEND_INTERVAL_MINUTES 10
 
 // Defined in app.c; also used to build the MQTT topic
 extern const char dev_name[];
@@ -117,7 +117,7 @@ static void SendTask(void *argument) {
       printf("Radio sleep mode activated\r\n");
       HAL_GPIO_WritePin(Led_GPIO_Port, Led_Pin, GPIO_PIN_SET);
 
-      osDelay(SEND_PERIOD_SECONDS * 1000);
+      osDelay(SEND_INTERVAL_MINUTES * 60 * 1000);
 
       printf("Trying to wakeup module\r\n");
       if (!WakeupModule()) {
