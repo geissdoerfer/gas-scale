@@ -24,14 +24,13 @@ bool MQTT_Init(void) {
   printf("Initializing MQTT...\r\n");
 
   // Store configuration
-  current_config = (MQTT_Config_t){
-      .broker_url =
-          "tcp://f85c8d608a674db6881108d544f12896.s1.eu.hivemq.cloud:8883",
-      .client_id = "ClientID",
-      .username = "nessie",
-      .password = "D-sub729",
-      .keepalive = 60,
-      .ca_cert = "isrgrootx1.pem"};
+  current_config =
+      (MQTT_Config_t){.broker_url = "tcp://mqtt.nessie-circuits.de:8883",
+                      .client_id = "ClientID",
+                      .username = "nessie",
+                      .password = "D-sub729",
+                      .keepalive = 60,
+                      .ca_cert = "isrgrootx1.pem"};
 
   // Sync module clock (needed for TLS certificate validation)
   AT_SendCommand("AT+CNTP\r\n", "OK", 2000);
